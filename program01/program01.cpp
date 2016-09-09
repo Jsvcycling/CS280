@@ -19,7 +19,7 @@ void print_line(std::list<char *> output_list, int line_length) {
 	std::list<char *> print_list;
 	int print_length = 0;
 
-    while(output_queue.size() > 0) {
+    while(output_list.size() > 0) {
 		int next_length = strlen(output_list.front());
 
 		if (print_length + next_length < line_length) {
@@ -29,16 +29,33 @@ void print_line(std::list<char *> output_list, int line_length) {
 			print_list.push_back(" ");
 			print_length += (next_length + 1);
 		} else if (print_length + next_length > line_length) {
-			// The line length limit has been reached.
+			// The next token would overflow the line length.
 
 			if (print_list.size() == 0) {
 				// If not even the next token fits the line_length parameters,
 				// split the token using a "-" symbol at the end of the end of
 				// the first part, and put the second part on the front of the
 				// output_list.
-			} else {
-				// TODO...
+				int chars_left = line_length - print_length;
+
+				char *last_word = output_list.pop_back();
+				
+				char *first_part[chars_left + 1];
+				strncpy(first_part, last_word, chars_left - 2);
+				first_part[chars_left - 2] = '-';  // Add dash.
+				first_part[chars_left - 1] = '\0'; // Make sure to make this a
+												   // null terminated string.
+
+				print_list.push_back(first_part);
+				break;
 			}
+
+			// TODO: calculate the number of spaces needed and distribute them
+			// as evenly as possible.
+		} else {
+			// The print_sum is equal to line length. It's a perfectly sized
+			// line so just go straight to print.
+			break;
 		}
 	}
 	
