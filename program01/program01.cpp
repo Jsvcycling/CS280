@@ -18,6 +18,9 @@
 void print_line(std::list<char *> output_list, int line_length) {
 	std::list<char *> print_list;
 	int print_length = 0;
+	int spaces_to_add = 0;
+	int min_spaces_per = 0;
+	int remaining_spaces = 0;
 
     while(output_list.size() > 0) {
 		int next_length = strlen(output_list.front());
@@ -32,13 +35,13 @@ void print_line(std::list<char *> output_list, int line_length) {
 			// The next token would overflow the line length.
 
 			if (print_list.size() == 0) {
-				// If not even the next token fits the line_length parameters,
-				// split the token using a "-" symbol at the end of the end of
-				// the first part, and put the second part on the front of the
-				// output_list.
+				// If not even the first token of the paragrpah fits the
+				// line_length parameters, split the token using a "-" symbol at
+				// the end of the end of the first part, and put the second part
+				// on the front of the output_list.
 				int chars_left = line_length - print_length;
 
-				char *last_word = output_list.pop_back();
+				char *last_word = output_list.pop_front();
 				
 				char *first_part[chars_left + 1];
 				strncpy(first_part, last_word, chars_left - 2);
@@ -47,19 +50,43 @@ void print_line(std::list<char *> output_list, int line_length) {
 												   // null terminated string.
 
 				print_list.push_back(first_part);
+
+				// TODO: re-add the second part of the token to the front of the
+				// list so that it is printed in the next line...
 				break;
 			}
 
-			// TODO: calculate the number of spaces needed and distribute them
-			// as evenly as possible.
+			// Calculate the number of spaces needed and the number of spaces to
+			// place in each slot.
+			spaces_to_add = line_length - print_length;
+			min_spaces_per = spaces_to_add / (print_list.size() / 2);
+			remaining_spaces = spaces_to_add % (print_list.size() / 2);
+			break;
 		} else {
-			// The print_sum is equal to line length. It's a perfectly sized
-			// line so just go straight to print.
+			// The print_sum is equal to the requested line length. It's a
+			// perfectly sized line so just go straight to print.
 			break;
 		}
 	}
 	
 	// TODO: print the line...
+	while (print_list.size() > 0) {
+		char *token = print_list.pop_front();
+
+		if (strcmp(token, ' ') == 0) {
+			// The token is a space, use our spacing values to figure out the
+			// correct number of spaces to insert here.
+
+			// TODO...
+			continue;
+		}
+
+		// Print out the token.
+		printf("%s", token);
+	}
+
+	// Add a newline.
+	printf("\n");
 }
 
 int main(int argc, char **argv) {
