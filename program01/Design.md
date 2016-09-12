@@ -27,3 +27,5 @@ the word on the next line.
 Upon encountering a like which contains only ".ll N" where N is an positive
 integer between 10 and 120, the line length of all following paragraphs is
 changed to the value of N (until the value is changed again).
+
+Spaces may not finish lines, but they may begin lines.

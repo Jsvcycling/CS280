@@ -69,7 +69,7 @@ void print_line(std::list<char *> output_list, int line_length) {
 		}
 	}
 	
-	// TODO: print the line...
+	// Print the line.
 	while (print_list.size() > 0) {
 		char *token = print_list.pop_front();
 
@@ -85,7 +85,7 @@ void print_line(std::list<char *> output_list, int line_length) {
 		printf("%s", token);
 	}
 
-	// Add a newline.
+	// Add a newline at the end.
 	printf("\n");
 }
 
@@ -141,10 +141,11 @@ int main(int argc, char **argv) {
 						}
 
 						// Finally, set the next line length. Also, if the
-						// output queue has contents, treat the .ll command as a
+						// output queue has content, treat the .ll command as a
 						// end of paragraph.
 						next_line_length = new_length;
 						generate = (output_list.size() > 0);
+						break;	// Should we break here? Why didn't I write this before??
 					}
 				} else if (strncmp(token, ".", 1) != 0) {
 					// Check if the line does not begin with a dot (lines
@@ -166,6 +167,9 @@ int main(int argc, char **argv) {
 
 			// Change the line length to the new line length.
 			line_length = next_line_length;
+
+			// Add a blank line between paragraphs.
+			printf("\n");
 		}
 	}
 
