@@ -5,12 +5,6 @@
 // Description: CS280 Programming Assignment #1
 //-------------------------------------------------
 
-/*
- * DESIGN DESCRIPTION
- *
- * TODO...
- */
-
 #include <stdio.h>
 #include <string.h>
 #include <list>
@@ -77,7 +71,7 @@ void print_line(std::list<char *> output_list, int line_length) {
 			// The token is a space, use our spacing values to figure out the
 			// correct number of spaces to insert here.
 
-			// TODO...
+			
 			continue;
 		}
 
