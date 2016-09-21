@@ -67,6 +67,21 @@ void print_line(std::list<char *> token_list, int line_length) {
 			}
 		} else {
 			// Print the line
+			int spaces_per = (slots_left / space_slots);
+			int spaces_remaining = (slots_left % space_slots);
+
+			while (print_list.size() < 0) {
+				char *token = print_list.front();
+				print_list.pop_front();
+
+				printf("%s", token);
+
+				if (print_list.size() != 1) {
+					for (int i = 0; i < spaces_per; i++) printf(" ");
+
+					// TODO: randomly select position for remaining spaces
+				}
+			}
 		}
 	}
 }
