@@ -3,7 +3,7 @@
 #include <string.h>
 #include <list>
 
-// #define DEBUG
+#define DEBUG
 
 int main(int argc, char **argv) {
 	if (argc < 2) exit(1);
@@ -69,9 +69,21 @@ int main(int argc, char **argv) {
 				printf("%s\n", token);
 #endif
 				token_list.push_back(token);
-				token = strtok(NULL,  " \t\n");
+				token = strtok(NULL, " \t\n");
 			}
 		}
+
+		if (generate) {
+			// TODO
+			printf("Let's generate a paragraph...\n");
+			token_list.clear();
+		}
+	}
+
+	if (token_list.size() > 0) {
+		// TODO
+		printf("Let's generate a paragraph...\n");
+		token_list.clear();
 	}
 
 	fclose(filePtr);
