@@ -5,6 +5,30 @@
 
 #define DEBUG
 
+void split_word(std::list<char *> *tokens, int word_len) {
+	char *word = tokens->front();
+
+	// Careful, this can become unruly with large input files!!!
+	char *first_part = (char *)malloc(sizeof(char) * (word_len + 1));
+	char *second_part = (char *)malloc(sizeof(char) * ((strlen(word) - word_len) + 1));
+	
+	memset(first_part, '\0', word_len);
+	memset(second_part, '\0', (strlen(tokens->front()) - word_len));
+	
+	strncpy(first_part, word, word_len - 1);
+	strncpy(second_part, &word[word_len - 1], (strlen(word) - word_len));
+
+	first_part[word_len - 1] = '-';
+
+	tokens->pop_front();
+	tokens->push_front(second_part);
+	tokens->push_front(first_part);
+
+#ifdef DEBUG
+	printf("first_part = %s\tsecond_part = %s\n", first_part, second_part);
+#endif
+}
+
 void print_line(std::list<char *> *tokens, int line_len) {
 	std::list<char *> print_list;
 	int slots_left = line_len;
@@ -12,10 +36,13 @@ void print_line(std::list<char *> *tokens, int line_len) {
 
 	while (tokens->size() > 0) {
 #ifdef DEBUG
-		// printf("space_slots = %i\tslots_left = %i\n", space_slots, slots_left);
-		printf("tokens.size(): %i\n", (int)tokens->size());
+		printf("space_slots = %i\tslots_left = %i\n", space_slots, slots_left);
+		// printf("tokens.size(): %i\n", (int)tokens->size());
 #endif
 		if ((space_slots * 3) < slots_left) {
+#ifdef DEBUG
+			printf("strlen(tokens->front()) = %i\n", (int)strlen(tokens->front()));
+#endif
 			if (strlen(tokens->front()) < (slots_left - space_slots)) {
 #ifdef DEBUG
 				printf("Next token: %s\tstrlen: %i\n", tokens->front(), (int)strlen(tokens->front()));
@@ -35,8 +62,12 @@ void print_line(std::list<char *> *tokens, int line_len) {
 				tokens->pop_front();
 				break;
 			} else {
-				// TODO: split the word.
-
+				split_word(tokens, (slots_left - space_slots));
+				
+#ifdef DEBUG
+				printf("Next token: %s\tstrlen: %i\n", tokens->front(), (int)strlen(tokens->front()));
+#endif
+				
 				slots_left -= strlen(tokens->front());
 				print_list.push_back(tokens->front());
 				tokens->pop_front();
@@ -46,6 +77,8 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			break;
 		}
 	}
+
+	// TODO: print the line.
 }
 
 int main(int argc, char **argv) {
@@ -76,44 +109,48 @@ int main(int argc, char **argv) {
 		strcpy(tokbuf, buf);
 		char *token = strtok(tokbuf, " \t\n");
 
-		while (token != NULL && !generate) {
-			if (strncmp(token, ".", 1) == 0) {
-				if (strcmp(token, ".ll") == 0) {
+		if (!generate) {
+			while (token != NULL) {
+				if (strncmp(token, ".", 1) == 0) {
+					if (strcmp(token, ".ll") == 0) {
 #ifdef DEBUG
-					printf("token is line length change... ");
+						printf("token is line length change... ");
 #endif
-					token = strtok(NULL, " \t\n");
+						token = strtok(NULL, " \t\n");
 				
-					if (token != NULL) {
-						if (strlen(buf) > (strlen(".ll ") + strlen(token) + 1)) {
+						if (token != NULL) {
+							if (strlen(buf) > (strlen(".ll ") + strlen(token) + 1)) {
 #ifdef DEBUG
-							printf("invalid line length command.\n");
+								printf("invalid line length command.\n");
 #endif
-						} else {
-							int new_len = atoi(token);
-							
-							if (new_len > 10 && new_len < 120) {
-#ifdef DEBUG
-								printf("new line length is %i.\n", new_len);
-#endif
-								next_line_len = new_len;
 							} else {
+								int new_len = atoi(token);
+							
+								if (new_len > 10 && new_len < 120) {
 #ifdef DEBUG
-								printf("invalid line length (%i).\n", new_len);
+									printf("new line length is %i.\n", new_len);
 #endif
+									next_line_len = new_len;
+								} else {
+#ifdef DEBUG
+									printf("invalid line length (%i).\n", new_len);
+#endif
+								}
 							}
 						}
 					}
-				}
 
-				break;
-			} else {
+					break;
+				} else {
 #ifdef DEBUG
-				printf("%s\t%i\n", token, (int)strlen(token));
+					printf("%s\t%i\n", token, (int)strlen(token));
 #endif
-				token_list.push_back(token);
-				token = strtok(NULL, " \t\n");
+					token_list.push_back(token);
+					token = strtok(NULL, " \t\n");
+				}
 			}
+
+			generate = (token_list.size() > 0);
 		}
 
 		if (generate) {
@@ -123,9 +160,9 @@ int main(int argc, char **argv) {
 			while (token_list.size() > 0) {
 				print_line(&token_list, line_len);
 			}
-			
-			// token_list.clear();
 		}
+
+		line_len = next_line_len;
 	}
 
 	if (token_list.size() > 0) {
@@ -135,8 +172,6 @@ int main(int argc, char **argv) {
 		while (token_list.size() > 0) {
 			print_line(&token_list, line_len);
 		}
-		
-		// token_list.clear();
 	}
 
 	fclose(filePtr);
