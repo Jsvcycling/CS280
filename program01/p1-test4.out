@@ -1,0 +1,294 @@
+token is line length change... new line length is 50.
+Mutability	10
+Let's generate a paragraph...
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 10
+Next token: Mutability	strlen: 10
+space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
+Empty line...
+Percy	5
+Bysshe	6
+Shelley,	8
+1792	4
+-	1
+1822	4
+Let's generate a paragraph...
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 5
+Next token: Percy	strlen: 5
+space_slots = 1	slots_left = 45
+strlen(tokens->front()) = 6
+Next token: Bysshe	strlen: 6
+space_slots = 2	slots_left = 39
+strlen(tokens->front()) = 8
+Next token: Shelley,	strlen: 8
+space_slots = 3	slots_left = 31
+strlen(tokens->front()) = 4
+Next token: 1792	strlen: 4
+space_slots = 4	slots_left = 27
+strlen(tokens->front()) = 1
+Next token: -	strlen: 1
+space_slots = 5	slots_left = 26
+strlen(tokens->front()) = 4
+Next token: 1822	strlen: 4
+space_slots: 5	spaces_per_slot: 5	remaining_spaces: 0
+Empty line...
+We	2
+are	3
+as	2
+clouds	6
+that	4
+veil	4
+the	3
+midnight	8
+moon;	5
+Let's generate a paragraph...
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 2
+Next token: We	strlen: 2
+space_slots = 1	slots_left = 48
+strlen(tokens->front()) = 3
+Next token: are	strlen: 3
+space_slots = 2	slots_left = 45
+strlen(tokens->front()) = 2
+Next token: as	strlen: 2
+space_slots = 3	slots_left = 43
+strlen(tokens->front()) = 6
+Next token: clouds	strlen: 6
+space_slots = 4	slots_left = 37
+strlen(tokens->front()) = 4
+Next token: that	strlen: 4
+space_slots = 5	slots_left = 33
+strlen(tokens->front()) = 4
+Next token: veil	strlen: 4
+space_slots = 6	slots_left = 29
+strlen(tokens->front()) = 3
+Next token: the	strlen: 3
+space_slots = 7	slots_left = 26
+strlen(tokens->front()) = 8
+Next token: midnight	strlen: 8
+space_slots = 8	slots_left = 18
+space_slots: 8	spaces_per_slot: 2	remaining_spaces: 2
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 5
+Next token: moon;	strlen: 5
+space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
+Let's generate a paragraph...
+Let's generate a paragraph...
+Let's generate a paragraph...
+Let's generate a paragraph...
+Empty line...
+Or	2
+like	4
+forgotten	9
+lyres,	6
+whose	5
+dissonant	9
+strings	7
+Give	4
+various	7
+response	8
+to	2
+each	4
+varying	7
+blast,	6
+To	2
+whose	5
+frail	5
+frame	5
+no	2
+second	6
+motion	6
+brings	6
+One	3
+mood	4
+or	2
+modulation	10
+like	4
+the	3
+last.	5
+Let's generate a paragraph...
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 2
+Next token: Or	strlen: 2
+space_slots = 1	slots_left = 48
+strlen(tokens->front()) = 4
+Next token: like	strlen: 4
+space_slots = 2	slots_left = 44
+strlen(tokens->front()) = 9
+Next token: forgotten	strlen: 9
+space_slots = 3	slots_left = 35
+strlen(tokens->front()) = 6
+Next token: lyres,	strlen: 6
+space_slots = 4	slots_left = 29
+strlen(tokens->front()) = 5
+Next token: whose	strlen: 5
+space_slots = 5	slots_left = 24
+strlen(tokens->front()) = 9
+Next token: dissonant	strlen: 9
+space_slots = 6	slots_left = 15
+space_slots: 6	spaces_per_slot: 2	remaining_spaces: 3
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 7
+Next token: strings	strlen: 7
+space_slots = 1	slots_left = 43
+strlen(tokens->front()) = 4
+Next token: Give	strlen: 4
+space_slots = 2	slots_left = 39
+strlen(tokens->front()) = 7
+Next token: various	strlen: 7
+space_slots = 3	slots_left = 32
+strlen(tokens->front()) = 8
+Next token: response	strlen: 8
+space_slots = 4	slots_left = 24
+strlen(tokens->front()) = 2
+Next token: to	strlen: 2
+space_slots = 5	slots_left = 22
+strlen(tokens->front()) = 4
+Next token: each	strlen: 4
+space_slots = 6	slots_left = 18
+space_slots: 6	spaces_per_slot: 3	remaining_spaces: 0
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 7
+Next token: varying	strlen: 7
+space_slots = 1	slots_left = 43
+strlen(tokens->front()) = 6
+Next token: blast,	strlen: 6
+space_slots = 2	slots_left = 37
+strlen(tokens->front()) = 2
+Next token: To	strlen: 2
+space_slots = 3	slots_left = 35
+strlen(tokens->front()) = 5
+Next token: whose	strlen: 5
+space_slots = 4	slots_left = 30
+strlen(tokens->front()) = 5
+Next token: frail	strlen: 5
+space_slots = 5	slots_left = 25
+strlen(tokens->front()) = 5
+Next token: frame	strlen: 5
+space_slots = 6	slots_left = 20
+strlen(tokens->front()) = 2
+Next token: no	strlen: 2
+space_slots = 7	slots_left = 18
+space_slots: 7	spaces_per_slot: 2	remaining_spaces: 4
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 6
+Next token: second	strlen: 6
+space_slots = 1	slots_left = 44
+strlen(tokens->front()) = 6
+Next token: motion	strlen: 6
+space_slots = 2	slots_left = 38
+strlen(tokens->front()) = 6
+Next token: brings	strlen: 6
+space_slots = 3	slots_left = 32
+strlen(tokens->front()) = 3
+Next token: One	strlen: 3
+space_slots = 4	slots_left = 29
+strlen(tokens->front()) = 4
+Next token: mood	strlen: 4
+space_slots = 5	slots_left = 25
+strlen(tokens->front()) = 2
+Next token: or	strlen: 2
+space_slots = 6	slots_left = 23
+strlen(tokens->front()) = 10
+Next token: modulation	strlen: 10
+space_slots = 7	slots_left = 13
+space_slots: 7	spaces_per_slot: 1	remaining_spaces: 6
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 4
+Next token: like	strlen: 4
+space_slots = 1	slots_left = 46
+strlen(tokens->front()) = 3
+Next token: the	strlen: 3
+space_slots = 2	slots_left = 43
+strlen(tokens->front()) = 5
+Next token: last.	strlen: 5
+space_slots: 2	spaces_per_slot: 2	remaining_spaces: 0
+Empty line...
+token is line length change... invalid line length (10).
+We	2
+rest.--A	8
+dream	5
+has	3
+power	5
+to	2
+poison	6
+sleep;	6
+Let's generate a paragraph...
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 2
+Next token: We	strlen: 2
+space_slots = 1	slots_left = 48
+strlen(tokens->front()) = 8
+Next token: rest.--A	strlen: 8
+space_slots = 2	slots_left = 40
+strlen(tokens->front()) = 5
+Next token: dream	strlen: 5
+space_slots = 3	slots_left = 35
+strlen(tokens->front()) = 3
+Next token: has	strlen: 3
+space_slots = 4	slots_left = 32
+strlen(tokens->front()) = 5
+Next token: power	strlen: 5
+space_slots = 5	slots_left = 27
+strlen(tokens->front()) = 2
+Next token: to	strlen: 2
+space_slots = 6	slots_left = 25
+strlen(tokens->front()) = 6
+Next token: poison	strlen: 6
+space_slots = 7	slots_left = 19
+space_slots: 7	spaces_per_slot: 2	remaining_spaces: 5
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 6
+Next token: sleep;	strlen: 6
+space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
+Let's generate a paragraph...
+Let's generate a paragraph...
+Let's generate a paragraph...
+Let's generate a paragraph...
+Empty line...
+Empty line...
+Empty line...
+It	2
+is	2
+the	3
+same!--For,	11
+be	2
+it	2
+joy	3
+or	2
+sorrow,	7
+Let's generate a paragraph...
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 2
+Next token: It	strlen: 2
+space_slots = 1	slots_left = 48
+strlen(tokens->front()) = 2
+Next token: is	strlen: 2
+space_slots = 2	slots_left = 46
+strlen(tokens->front()) = 3
+Next token: the	strlen: 3
+space_slots = 3	slots_left = 43
+strlen(tokens->front()) = 11
+Next token: same!--For,	strlen: 11
+space_slots = 4	slots_left = 32
+strlen(tokens->front()) = 2
+Next token: be	strlen: 2
+space_slots = 5	slots_left = 30
+strlen(tokens->front()) = 2
+Next token: it	strlen: 2
+space_slots = 6	slots_left = 28
+strlen(tokens->front()) = 3
+Next token: joy	strlen: 3
+space_slots = 7	slots_left = 25
+strlen(tokens->front()) = 2
+Next token: or	strlen: 2
+space_slots = 8	slots_left = 23
+space_slots: 8	spaces_per_slot: 2	remaining_spaces: 7
+space_slots = 0	slots_left = 50
+strlen(tokens->front()) = 7
+Next token: sorrow,	strlen: 7
+space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
+Let's generate a paragraph...
+Let's generate a paragraph...
+Let's generate a paragraph...
