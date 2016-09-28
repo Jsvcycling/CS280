@@ -37,12 +37,8 @@ void print_line(std::list<char *> *tokens, int line_len) {
 	while (tokens->size() > 0) {
 #ifdef DEBUG
 		printf("space_slots = %i\tslots_left = %i\n", space_slots, slots_left);
-		// printf("tokens.size(): %i\n", (int)tokens->size());
 #endif
 		if ((space_slots * 3) < slots_left) {
-#ifdef DEBUG
-			printf("strlen(tokens->front()) = %i\n", (int)strlen(tokens->front()));
-#endif
 			if (strlen(tokens->front()) < (slots_left - space_slots)) {
 #ifdef DEBUG
 				printf("Next token: %s\tstrlen: %i\n", tokens->front(), (int)strlen(tokens->front()));
@@ -100,16 +96,16 @@ void print_line(std::list<char *> *tokens, int line_len) {
 	printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left);
 #endif
 
-	while (print_list.size() > 0) {
-		printf("%s", print_list.front());
-		print_list.pop_front();
+	// while (print_list.size() > 0) {
+	// 	printf("%s", print_list.front());
+	// 	print_list.pop_front();
 
-		for (int i = 0; i < spaces_per_slot; i++) {
-			printf(" ");
-		}
-	}
+	// 	for (int i = 0; i < spaces_per_slot; i++) {
+	// 		printf(" ");
+	// 	}
+	// }
 
-	printf("\n");
+	// printf("\n");
 }
 
 int main(int argc, char **argv) {
@@ -124,73 +120,63 @@ int main(int argc, char **argv) {
 	int line_len = 60;
 	int next_line_len = line_len;
 
-	while (fgets(buf, 256, filePtr) != NULL) {
-		bool generate = false;
-		
+	while (true) {
+		while (fgets(buf, 256, filePtr)) {
+			if (strlen(buf) <= 1) {
 #ifdef DEBUG
-		// printf("%s\t%i", buf, (int)strlen(buf));
+				printf("Empty line...\n");
 #endif
-		if (strlen(buf) <= 1) {
+				break;
+			} else {
+				char tokbuf[256];
+				strcpy(tokbuf, buf);
+				char *token = strtok(tokbuf, " \t\n");
+			
+				if (strncmp(buf, ".", 1) == 0) {
+					if (strcmp(token, ".ll") == 0) {
 #ifdef DEBUG
-			printf("Empty line...\n");
+						printf("token is line length change... ");
 #endif
-			generate = (token_list.size() > 0);
-		}
-		
-		char tokbuf[256];
-		strcpy(tokbuf, buf);
-		char *token = strtok(tokbuf, " \t\n");
-
-		if (!generate) {
-			if (strncmp(buf, ".", 1) == 0) {
-				if (strcmp(token, ".ll") == 0) {
-#ifdef DEBUG
-					printf("token is line length change... ");
-#endif
-					token = strtok(NULL, " \t\n");
+						token = strtok(NULL, " \t\n");
 				
-					if (token != NULL) {
-						if (strlen(buf) > (strlen(".ll ") + strlen(token) + 1)) {
+						if (token != NULL) {
+p							if (strlen(buf) > (strlen(".ll ") + strlen(token) + 1)) {
 #ifdef DEBUG
-							printf("invalid line length command.\n");
+								printf("invalid line length command.\n");
 #endif
-						} else {
-							int new_len = atoi(token);
-							
-							if (new_len > 10 && new_len < 120) {
-#ifdef DEBUG
-								printf("new line length is %i.\n", new_len);
-#endif
-								next_line_len = new_len;
 							} else {
+								int new_len = atoi(token);
+							
+								if (new_len > 10 && new_len < 120) {
 #ifdef DEBUG
-								printf("invalid line length (%i).\n", new_len);
+									printf("new line length is %i.\n", new_len);
 #endif
+									next_line_len = new_len;
+								} else {
+#ifdef DEBUG
+									printf("invalid line length (%i).\n", new_len);
+#endif
+								}
 							}
 						}
 					}
+
+					token = NULL;
+				}
+			
+				while (token != NULL) {
+					token_list.push_back(token);
+					token = strtok(NULL, " \t\n");
 				}
 			}
-			
-			while (token != NULL) {
-#ifdef DEBUG
-				// printf("%s\t%i\n", token, (int)strlen(token));
-#endif
-				token_list.push_back(token);
-				token = strtok(NULL, " \t\n");
-			}
-
-			generate = (token_list.size() > 0);
 		}
 
-		if (generate) {
+		if (token_list.size() > 0) {
 #ifdef DEBUG
 			printf("Let's generate a paragraph...\n");
 #endif
 			while (token_list.size() > 0) {
 				print_line(&token_list, line_len);
-				// printf("%s ", token_list.front());
-				// token_list.pop_front();
 			}
 			
 			printf("\n");
@@ -198,17 +184,6 @@ int main(int argc, char **argv) {
 
 		line_len = next_line_len;
 	}
-		
-// 	if (token_list.size() > 0) {
-// #ifdef DEBUG
-// 		printf("Let's generate our final paragraph...\n");
-// #endif
-// 		while (token_list.size() > 0) {
-// 			print_line(&token_list, line_len);
-// 		}
-
-// 		printf("\n");
-// 	}
 
 	fclose(filePtr);
 	return 0;
