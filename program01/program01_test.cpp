@@ -1,32 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 #include <list>
 
-// #define DEBUG
+#define DEBUG
 
 void split_word(std::list<char *> *tokens, int word_len) {
 	char *word = tokens->front();
 
-	// Careful, this can become unruly with large input files!!!
-	char *first_part = (char *)malloc(sizeof(char) * (word_len + 1));
-	char *second_part = (char *)malloc(sizeof(char) * ((strlen(word) - word_len) + 1));
-	
-	memset(first_part, '\0', word_len);
-	memset(second_part, '\0', (strlen(tokens->front()) - word_len));
-	
-	strncpy(first_part, word, word_len - 1);
-	strncpy(second_part, &word[word_len - 1], (strlen(word) - word_len));
+	int first_part_len = word_len;
+	int second_part_len = strlen(word) - word_len;
 
-	first_part[word_len - 1] = '-';
+	char *first_part = (char *)malloc(sizeof(char) * (first_part_len + 1));
+	char *second_part = (char *)malloc(sizeof(char) * (second_part_len + 2));
+	
+	memset(first_part, '\0', first_part_len + 1);
+	memset(second_part, '\0', second_part_len + 2);
+	
+	strncpy(first_part, word, first_part_len);
+	strncpy(second_part, &word[first_part_len - 1], second_part_len + 1);
+
+	first_part[first_part_len - 1] = '-';
 
 	tokens->pop_front();
 	tokens->push_front(second_part);
 	tokens->push_front(first_part);
 
 #ifdef DEBUG
-	printf("first_part = %s\tsecond_part = %s\n", first_part, second_part);
+	printf("word = %s\tfirst_part = %s\tsecond_part = %s\n", word, first_part, second_part);
 #endif
+
+	free(word);
 }
 
 void print_line(std::list<char *> *tokens, int line_len) {
@@ -34,14 +40,18 @@ void print_line(std::list<char *> *tokens, int line_len) {
 	int slots_left = line_len;
 	int space_slots = 0;
 
-	while (tokens->size() > 0) {
 #ifdef DEBUG
-		printf("space_slots = %i\tslots_left = %i\n", space_slots, slots_left);
+	printf("slots_left = %i\n", slots_left);
 #endif
-		if ((space_slots * 3) < slots_left) {
+
+	while (tokens->size() > 0) {
+// #ifdef DEBUG
+// 		printf("space_slots = %i\tslots_left = %i\n", space_slots, slots_left);
+// #endif
+		if ((space_slots * 3) <= slots_left) {
 			if (strlen(tokens->front()) < (slots_left - space_slots)) {
 #ifdef DEBUG
-				printf("Next token: %s\tstrlen: %i\n", tokens->front(), (int)strlen(tokens->front()));
+				printf("Next token: %s\tstrlen: %i\t(slots_left - space_slots = %i)\n", tokens->front(), (int)strlen(tokens->front()), (slots_left - space_slots));
 #endif
 				slots_left -= strlen(tokens->front());
 				print_list.push_back(tokens->front());
@@ -65,7 +75,7 @@ void print_line(std::list<char *> *tokens, int line_len) {
 #ifdef DEBUG
 				printf("Next token: %s\tstrlen: %i\n", tokens->front(), (int)strlen(tokens->front()));
 #endif
-				
+
 				slots_left -= strlen(tokens->front());
 				print_list.push_back(tokens->front());
 				tokens->pop_front();
@@ -76,16 +86,20 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		}
 	}
 
+	// For some reason, an extra space slot is being added so let's remove it.
+	space_slots -= 1;
+
 	int spaces_per_slot = 0;
 	int remaining_spaces = 0;
 	
 	if (space_slots > 0) {
 		if ((space_slots * 3) >= slots_left) {
 			spaces_per_slot = slots_left / space_slots;
-			spaces_per_slot = (spaces_per_slot <= 3) ? spaces_per_slot : 3;
-			
-			if (spaces_per_slot < 3) {
+
+			if (spaces_per_slot <= 3) {
 				remaining_spaces = slots_left % space_slots;
+			} else {
+				spaces_per_slot = 3;
 			}
 		} else {
 			spaces_per_slot = 1;
@@ -96,12 +110,24 @@ void print_line(std::list<char *> *tokens, int line_len) {
 	printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left);
 #endif
 
+	// Consistency is key...
+	srand(0);
+
 	while (print_list.size() > 0) {
-		printf("%s", print_list.front());
+		char *str = print_list.front();
 		print_list.pop_front();
+		printf("%s", str);
+		free(str);
 
 		for (int i = 0; i < spaces_per_slot; i++) {
+			if (print_list.size() > 0) {
+				printf(" ");
+			}
+		}
+
+		if (remaining_spaces > 0) {
 			printf(" ");
+			remaining_spaces -= 1;
 		}
 	}
 
@@ -178,11 +204,11 @@ int main(int argc, char **argv) {
 			}
 		}
 
-#ifdef DEBUG
-		for (std::list<char *>::iterator i = token_list.begin(); i != token_list.end(); ++i) {
-			printf("%s\n", *i);
-		}
-#endif
+// #ifdef DEBUG
+// 		for (std::list<char *>::iterator i = token_list.begin(); i != token_list.end(); ++i) {
+// 			printf("%s\n", *i);
+// 		}
+// #endif
 
 		if (generate) {
 #ifdef DEBUG
