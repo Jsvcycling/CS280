@@ -3,7 +3,7 @@
 #include <string.h>
 #include <list>
 
-#define DEBUG
+// #define DEBUG
 
 void split_word(std::list<char *> *tokens, int word_len) {
 	char *word = tokens->front();
@@ -96,16 +96,16 @@ void print_line(std::list<char *> *tokens, int line_len) {
 	printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left);
 #endif
 
-	// while (print_list.size() > 0) {
-	// 	printf("%s", print_list.front());
-	// 	print_list.pop_front();
+	while (print_list.size() > 0) {
+		printf("%s", print_list.front());
+		print_list.pop_front();
 
-	// 	for (int i = 0; i < spaces_per_slot; i++) {
-	// 		printf(" ");
-	// 	}
-	// }
+		for (int i = 0; i < spaces_per_slot; i++) {
+			printf(" ");
+		}
+	}
 
-	// printf("\n");
+	printf("\n");
 }
 
 int main(int argc, char **argv) {
@@ -120,58 +120,71 @@ int main(int argc, char **argv) {
 	int line_len = 60;
 	int next_line_len = line_len;
 
-	while (true) {
+	while (!feof(filePtr)) {
+		bool generate = false;
+		
 		while (fgets(buf, 256, filePtr)) {
 			if (strlen(buf) <= 1) {
 #ifdef DEBUG
 				printf("Empty line...\n");
 #endif
+				generate = (token_list.size() > 0);
 				break;
-			} else {
-				char tokbuf[256];
-				strcpy(tokbuf, buf);
-				char *token = strtok(tokbuf, " \t\n");
-			
-				if (strncmp(buf, ".", 1) == 0) {
-					if (strcmp(token, ".ll") == 0) {
+			}
+
+			char tokbuf[256];
+			strcpy(tokbuf, buf);
+			char *token = strtok(tokbuf, " \t\n");
+		    
+			if (strncmp(token, ".", 1) == 0) {
+				if (strcmp(token, ".ll") == 0) {
 #ifdef DEBUG
-						printf("token is line length change... ");
+					printf("token is line length change... ");
 #endif
-						token = strtok(NULL, " \t\n");
+					token = strtok(NULL, " \t\n");
 				
-						if (token != NULL) {
-p							if (strlen(buf) > (strlen(".ll ") + strlen(token) + 1)) {
+					if (token != NULL) {
+						if (strlen(buf) > (strlen(".ll ") + strlen(token) + 1)) {
 #ifdef DEBUG
-								printf("invalid line length command.\n");
+							printf("invalid line length command.\n");
 #endif
-							} else {
-								int new_len = atoi(token);
+						} else {
+							int new_len = atoi(token);
 							
-								if (new_len > 10 && new_len < 120) {
+							if (new_len >= 10 && new_len <= 120) {
 #ifdef DEBUG
-									printf("new line length is %i.\n", new_len);
+								printf("new line length is %i.\n", new_len);
 #endif
-									next_line_len = new_len;
-								} else {
+								next_line_len = new_len;
+							} else {
 #ifdef DEBUG
-									printf("invalid line length (%i).\n", new_len);
+								printf("invalid line length (%i).\n", new_len);
 #endif
-								}
 							}
 						}
 					}
-
-					token = NULL;
 				}
-			
+
+				generate = (token_list.size() > 0);
+				break;
+			} else {
 				while (token != NULL) {
-					token_list.push_back(token);
+					char *str = (char *)malloc(sizeof(char) * strlen(token));
+					strcpy(str, token);
+
+					token_list.push_back(str);
 					token = strtok(NULL, " \t\n");
 				}
 			}
 		}
 
-		if (token_list.size() > 0) {
+#ifdef DEBUG
+		for (std::list<char *>::iterator i = token_list.begin(); i != token_list.end(); ++i) {
+			printf("%s\n", *i);
+		}
+#endif
+
+		if (generate) {
 #ifdef DEBUG
 			printf("Let's generate a paragraph...\n");
 #endif
