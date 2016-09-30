@@ -46,28 +46,46 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			print_list.push_back(tokens->front());
 			tokens->pop_front();
 
-			if (tokens->size() > 0) {
-				space_slots += 1;
-			}
-		} else if (strlen(tokens->front()) == (slots_left - space_slots)) {
-			slots_left -= strlen(tokens->front());
+			space_slots += 1;
+		} else if (strlen(tokens->front()) == line_len) {
+			slots_left = 0;
 			print_list.push_back(tokens->front());
 			tokens->pop_front();
 			break;
+		} else if ((space_slots * 3) < (slots_left - 1)) {
+			split_word(tokens, (slots_left - space_slots));
 		} else {
-			if ((space_slots * 3) < slots_left) {
-				split_word(tokens, (slots_left - space_slots));
-			
-				slots_left -= strlen(tokens->front());
-				print_list.push_back(tokens->front());
-				tokens->pop_front();
-			}
-
 			break;
 		}
 	}
 
-	if ((slots_left - space_slots) != 0) space_slots -= 1;
+	// while (tokens->size() > 0) {
+	// 	if (strlen(tokens->front()) < (slots_left - space_slots)) {
+	// 		slots_left -= strlen(tokens->front());
+	// 		print_list.push_back(tokens->front());
+	// 		tokens->pop_front();
+
+	// 		space_slots += 1;
+	// 	} else {
+	// 		if (strlen(tokens->front()) == (slots_left - space_slots)) {
+	// 			slots_left = space_slots;
+	// 			print_list.push_back(tokens->front());
+	// 			tokens->pop_front();
+	// 		} else if (strlen(tokens->front()) == line_len) {
+	// 			slots_left = 0;
+	// 			print_list.push_back(tokens->front());
+	// 			tokens->pop_front();
+	// 		} else if ((space_slots * 3) < (slots_left - 1)) {
+	// 			split_word(tokens, (slots_left - space_slots));
+			
+	// 			slots_left -= strlen(tokens->front());
+	// 			print_list.push_back(tokens->front());
+	// 			tokens->pop_front();
+	// 		}
+
+	// 		break;
+	// 	}
+	// }
 
 	int spaces_per_slot = 0;
 	int remaining_spaces = 0;
@@ -77,12 +95,12 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			spaces_per_slot = 1;
 		} else {
 			spaces_per_slot = slots_left / space_slots;
-			remaining_spaces = slots_left % space_slots;
+			remaining_spaces = slots_left - (space_slots * spaces_per_slot);;
 		}
 	}
 
 #ifdef DEBUG
-	printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left);
+	printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left, line_len - slots_left);
 #endif
 
 	while (print_list.size() > 0) {
