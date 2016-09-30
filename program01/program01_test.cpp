@@ -59,33 +59,7 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		}
 	}
 
-	// while (tokens->size() > 0) {
-	// 	if (strlen(tokens->front()) < (slots_left - space_slots)) {
-	// 		slots_left -= strlen(tokens->front());
-	// 		print_list.push_back(tokens->front());
-	// 		tokens->pop_front();
-
-	// 		space_slots += 1;
-	// 	} else {
-	// 		if (strlen(tokens->front()) == (slots_left - space_slots)) {
-	// 			slots_left = space_slots;
-	// 			print_list.push_back(tokens->front());
-	// 			tokens->pop_front();
-	// 		} else if (strlen(tokens->front()) == line_len) {
-	// 			slots_left = 0;
-	// 			print_list.push_back(tokens->front());
-	// 			tokens->pop_front();
-	// 		} else if ((space_slots * 3) < (slots_left - 1)) {
-	// 			split_word(tokens, (slots_left - space_slots));
-			
-	// 			slots_left -= strlen(tokens->front());
-	// 			print_list.push_back(tokens->front());
-	// 			tokens->pop_front();
-	// 		}
-
-	// 		break;
-	// 	}
-	// }
+	if (slots_left != line_len) space_slots -= 1;
 
 	int spaces_per_slot = 0;
 	int remaining_spaces = 0;
