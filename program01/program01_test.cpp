@@ -40,15 +40,8 @@ void print_line(std::list<char *> *tokens, int line_len) {
 	int slots_left = line_len;
 	int space_slots = 0;
 
-#ifdef DEBUG
-	printf("slots_left = %i\n", slots_left);
-#endif
-
 	while (tokens->size() > 0) {
 		if (strlen(tokens->front()) < (slots_left - space_slots)) {
-#ifdef DEBUG
-				printf("Next token: %s\tstrlen: %i\t(slots_left - space_slots = %i)\n", tokens->front(), (int)strlen(tokens->front()), (slots_left - space_slots));
-#endif
 			slots_left -= strlen(tokens->front());
 			print_list.push_back(tokens->front());
 			tokens->pop_front();
@@ -62,9 +55,9 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			tokens->pop_front();
 			break;
 		} else {
-			if ((space_slots * 3) <= slots_left) {
+			if ((space_slots * 3) < slots_left) {
 				split_word(tokens, (slots_left - space_slots));
-
+			
 				slots_left -= strlen(tokens->front());
 				print_list.push_back(tokens->front());
 				tokens->pop_front();
@@ -74,23 +67,17 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		}
 	}
 
-	// For some reason, an extra space slot is being added so let's remove it.
-	space_slots -= 1;
+	if ((slots_left - space_slots) != 0) space_slots -= 1;
 
 	int spaces_per_slot = 0;
 	int remaining_spaces = 0;
-	
+
 	if (space_slots > 0) {
-		if (space_slots == slots_left) {
+		if ((space_slots * 3) < slots_left) {
 			spaces_per_slot = 1;
 		} else {
 			spaces_per_slot = slots_left / space_slots;
-
-			if (spaces_per_slot < 3) {
-				remaining_spaces = slots_left % space_slots;
-			} else {
-				spaces_per_slot = 3;
-			}
+			remaining_spaces = slots_left % space_slots;
 		}
 	}
 
