@@ -38,7 +38,6 @@ void split_word(std::list<char *> *tokens, int word_len) {
 void print_line(std::list<char *> *tokens, int line_len) {
 	std::list<char *> print_list;
 	int slots_left = line_len;
-	// int space_slots = 0;
 
 	while (tokens->size() > 0) {
 		if (strlen(tokens->front()) == line_len) {
@@ -54,8 +53,6 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			slots_left -= strlen(tokens->front());
 			print_list.push_back(tokens->front());
 			tokens->pop_front();
-
-			// space_slots += 1;
 		} else if ((print_list.size() * 3) < (slots_left)) {
 			split_word(tokens, (slots_left - print_list.size()));
 		} else {
@@ -84,15 +81,6 @@ void print_line(std::list<char *> *tokens, int line_len) {
 				remaining_spaces = slots_left - (spaces_per_slot * (print_list.size() - 1));
 			}
 		}
-
-		// if (space_slots > 0) {
-		// 	if ((space_slots * 3) < slots_left) {
-		// 		spaces_per_slot = 1;
-		// 	} else {
-		// 		spaces_per_slot = slots_left / space_slots;
-		// 		remaining_spaces = slots_left - (space_slots * spaces_per_slot);
-		// 	}
-		// }
 
 #ifdef DEBUG
 		printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left, line_len - slots_left);
