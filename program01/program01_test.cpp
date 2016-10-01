@@ -38,64 +38,86 @@ void split_word(std::list<char *> *tokens, int word_len) {
 void print_line(std::list<char *> *tokens, int line_len) {
 	std::list<char *> print_list;
 	int slots_left = line_len;
-	int space_slots = 0;
+	// int space_slots = 0;
 
 	while (tokens->size() > 0) {
-		if (strlen(tokens->front()) < (slots_left - space_slots)) {
+		if (strlen(tokens->front()) == line_len) {
+			printf("%s\n", tokens->front());
+			tokens->pop_front();
+			return;
+		} else if (strlen(tokens->front()) == (slots_left - print_list.size())) {
+			slots_left -= strlen(tokens->front());
+			print_list.push_back(tokens->front());
+			tokens->pop_front();
+			break;
+		} else if (strlen(tokens->front()) < (slots_left - print_list.size())) {
 			slots_left -= strlen(tokens->front());
 			print_list.push_back(tokens->front());
 			tokens->pop_front();
 
-			space_slots += 1;
-		} else if (strlen(tokens->front()) == line_len) {
-			slots_left = 0;
-			print_list.push_back(tokens->front());
-			tokens->pop_front();
-			break;
-		} else if ((space_slots * 3) < (slots_left - 1)) {
-			split_word(tokens, (slots_left - space_slots));
+			// space_slots += 1;
+		} else if ((print_list.size() * 3) < (slots_left)) {
+			split_word(tokens, (slots_left - print_list.size()));
 		} else {
 			break;
 		}
 	}
 
-	if (slots_left != line_len) space_slots -= 1;
-
-	int spaces_per_slot = 0;
-	int remaining_spaces = 0;
-
-	if (space_slots > 0) {
-		if ((space_slots * 3) < slots_left) {
-			spaces_per_slot = 1;
-		} else {
-			spaces_per_slot = slots_left / space_slots;
-			remaining_spaces = slots_left - (space_slots * spaces_per_slot);;
+	if (print_list.size() == 1 && slots_left <= 3) {
+		for (int i = 0; i < slots_left; i++) {
+			printf(" ");
 		}
-	}
 
-#ifdef DEBUG
-	printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left, line_len - slots_left);
-#endif
-
-	while (print_list.size() > 0) {
 		char *str = print_list.front();
 		print_list.pop_front();
-		printf("%s", str);
+		printf("%s\n", str);
 		free(str);
+	} else {
+		int spaces_per_slot = 0;
+		int remaining_spaces = 0;
 
-		for (int i = 0; i < spaces_per_slot; i++) {
-			if (print_list.size() > 0) {
-				printf(" ");
+		if (print_list.size() > 1) {
+			if (((print_list.size() - 1) * 3) < slots_left) {
+				spaces_per_slot = 1;
+			} else {
+				spaces_per_slot = slots_left / (print_list.size() - 1);
+				remaining_spaces = slots_left - (spaces_per_slot * (print_list.size() - 1));
 			}
 		}
 
-		if (remaining_spaces > 0) {
-			printf(" ");
-			remaining_spaces -= 1;
-		}
-	}
+		// if (space_slots > 0) {
+		// 	if ((space_slots * 3) < slots_left) {
+		// 		spaces_per_slot = 1;
+		// 	} else {
+		// 		spaces_per_slot = slots_left / space_slots;
+		// 		remaining_spaces = slots_left - (space_slots * spaces_per_slot);
+		// 	}
+		// }
 
-	printf("\n");
+#ifdef DEBUG
+		printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left, line_len - slots_left);
+#endif
+
+		while (print_list.size() > 0) {
+			char *str = print_list.front();
+			print_list.pop_front();
+			printf("%s", str);
+			free(str);
+
+			for (int i = 0; i < spaces_per_slot; i++) {
+				if (print_list.size() > 0) {
+					printf(" ");
+				}
+			}
+
+			if (remaining_spaces > 0) {
+				printf(" ");
+				remaining_spaces -= 1;
+			}
+		}
+
+		printf("\n");
+	}
 }
 
 void parse_paragraph(FILE *filePtr, int *line_len) {
