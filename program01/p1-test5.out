@@ -1,450 +1,74 @@
-token is line length change... new line length is 15.
-ThisIsAReallyLongLineThatMightHaveToStretchOutABit	50
-Let's generate a paragraph...
-space_slots = 0	slots_left = 15
-strlen(tokens->front()) = 50
-first_part = ThisIsAReallyL-	second_part = ongLineThatMightHaveToStretchOutABi
-Next token: ThisIsAReallyL-	strlen: 15
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-space_slots = 0	slots_left = 15
-strlen(tokens->front()) = 35
-first_part = ongLineThatMig-	second_part = htHaveToStretchOutAB
-Next token: ongLineThatMig-	strlen: 15
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-space_slots = 0	slots_left = 15
-strlen(tokens->front()) = 20
-first_part = htHaveToStretc-	second_part = hOutA
-Next token: htHaveToStretc-	strlen: 15
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-space_slots = 0	slots_left = 15
-strlen(tokens->front()) = 5
-Next token: hOutA	strlen: 5
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-Empty line...
-ThisIsExactly15	15
-Let's generate a paragraph...
-space_slots = 0	slots_left = 15
-strlen(tokens->front()) = 15
-Final token: ThisIsExactly15
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-Empty line...
-Foo!	4
-Let's generate a paragraph...
-space_slots = 0	slots_left = 15
-strlen(tokens->front()) = 4
-Next token: Foo!	strlen: 4
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-Empty line...
-Empty line...
-Empty line...
-Empty line...
-Empty line...
-Empty line...
-Empty line...
-Empty line...
-token is line length change... new line length is 30.
-Empty line...
-You	3
-say	3
-you	3
-stand	5
-by	2
-your	4
-man	3
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: You	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: say	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 3	slots_left = 21
-strlen(tokens->front()) = 5
-Next token: stand	strlen: 5
-space_slots = 4	slots_left = 16
-strlen(tokens->front()) = 2
-Next token: by	strlen: 2
-space_slots = 5	slots_left = 14
-space_slots: 5	spaces_per_slot: 2	remaining_spaces: 4
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 4
-Next token: your	strlen: 4
-space_slots = 1	slots_left = 26
-strlen(tokens->front()) = 3
-Next token: man	strlen: 3
-space_slots: 1	spaces_per_slot: 1	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-Well	4
-some	4
-things	6
-you	3
-can	3
-explain	7
-away	4
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 4
-Next token: Well	strlen: 4
-space_slots = 1	slots_left = 26
-strlen(tokens->front()) = 4
-Next token: some	strlen: 4
-space_slots = 2	slots_left = 22
-strlen(tokens->front()) = 6
-Next token: things	strlen: 6
-space_slots = 3	slots_left = 16
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 4	slots_left = 13
-strlen(tokens->front()) = 3
-Next token: can	strlen: 3
-space_slots = 5	slots_left = 10
-space_slots: 5	spaces_per_slot: 2	remaining_spaces: 0
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 7
-Next token: explain	strlen: 7
-space_slots = 1	slots_left = 23
-strlen(tokens->front()) = 4
-Next token: away	strlen: 4
-space_slots: 1	spaces_per_slot: 1	remaining_spaces: 0
-Let's generate a paragraph...
-Empty line...
-Did	3
-you	3
-stand	5
-by	2
-me	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: Did	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: stand	strlen: 5
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 2
-Next token: by	strlen: 2
-space_slots = 4	slots_left = 17
-strlen(tokens->front()) = 2
-Next token: me	strlen: 2
-space_slots: 4	spaces_per_slot: 4	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-All	3
-the	3
-times	5
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: All	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: the	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: times	strlen: 5
-space_slots: 2	spaces_per_slot: 2	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-So	2
-all	3
-alone	5
-I	1
-keep	4
-the	3
-wolves	6
-at	2
-bay	3
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 2
-Next token: So	strlen: 2
-space_slots = 1	slots_left = 28
-strlen(tokens->front()) = 3
-Next token: all	strlen: 3
-space_slots = 2	slots_left = 25
-strlen(tokens->front()) = 5
-Next token: alone	strlen: 5
-space_slots = 3	slots_left = 20
-strlen(tokens->front()) = 1
-Next token: I	strlen: 1
-space_slots = 4	slots_left = 19
-strlen(tokens->front()) = 4
-Next token: keep	strlen: 4
-space_slots = 5	slots_left = 15
-space_slots: 5	spaces_per_slot: 3	remaining_spaces: 0
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: the	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 6
-Next token: wolves	strlen: 6
-space_slots = 2	slots_left = 21
-strlen(tokens->front()) = 2
-Next token: at	strlen: 2
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 3
-Next token: bay	strlen: 3
-space_slots: 3	spaces_per_slot: 3	remaining_spaces: 0
-Let's generate a paragraph...
-Empty line...
-Did	3
-you	3
-stand	5
-by	2
-me	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: Did	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: stand	strlen: 5
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 2
-Next token: by	strlen: 2
-space_slots = 4	slots_left = 17
-strlen(tokens->front()) = 2
-Next token: me	strlen: 2
-space_slots: 4	spaces_per_slot: 4	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-You	3
-must	4
-explain	7
-why	3
-this	4
-must	4
-be	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: You	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 4
-Next token: must	strlen: 4
-space_slots = 2	slots_left = 23
-strlen(tokens->front()) = 7
-Next token: explain	strlen: 7
-space_slots = 3	slots_left = 16
-strlen(tokens->front()) = 3
-Next token: why	strlen: 3
-space_slots = 4	slots_left = 13
-strlen(tokens->front()) = 4
-Next token: this	strlen: 4
-space_slots = 5	slots_left = 9
-space_slots: 5	spaces_per_slot: 1	remaining_spaces: 4
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 4
-Next token: must	strlen: 4
-space_slots = 1	slots_left = 26
-strlen(tokens->front()) = 2
-Next token: be	strlen: 2
-space_slots: 1	spaces_per_slot: 1	remaining_spaces: 0
-Let's generate a paragraph...
-Empty line...
-Did	3
-you	3
-stand	5
-by	2
-me	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: Did	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: stand	strlen: 5
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 2
-Next token: by	strlen: 2
-space_slots = 4	slots_left = 17
-strlen(tokens->front()) = 2
-Next token: me	strlen: 2
-space_slots: 4	spaces_per_slot: 4	remaining_spaces: 0
-Let's generate a paragraph...
-Empty line...
-Now	3
-I	1
-got	3
-a	1
-job	3
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: Now	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 1
-Next token: I	strlen: 1
-space_slots = 2	slots_left = 26
-strlen(tokens->front()) = 3
-Next token: got	strlen: 3
-space_slots = 3	slots_left = 23
-strlen(tokens->front()) = 1
-Next token: a	strlen: 1
-space_slots = 4	slots_left = 22
-strlen(tokens->front()) = 3
-Next token: job	strlen: 3
-space_slots: 4	spaces_per_slot: 4	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-But	3
-you	3
-don't	5
-understand	10
-my	2
-point	5
-of	2
-view	4
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: But	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: don't	strlen: 5
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 10
-Next token: understand	strlen: 10
-space_slots = 4	slots_left = 9
-space_slots: 4	spaces_per_slot: 2	remaining_spaces: 1
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 2
-Next token: my	strlen: 2
-space_slots = 1	slots_left = 28
-strlen(tokens->front()) = 5
-Next token: point	strlen: 5
-space_slots = 2	slots_left = 23
-strlen(tokens->front()) = 2
-Next token: of	strlen: 2
-space_slots = 3	slots_left = 21
-strlen(tokens->front()) = 4
-Next token: view	strlen: 4
-space_slots: 3	spaces_per_slot: 3	remaining_spaces: 0
-Let's generate a paragraph...
-Empty line...
-Did	3
-you	3
-stand	5
-by	2
-me	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: Did	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: stand	strlen: 5
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 2
-Next token: by	strlen: 2
-space_slots = 4	slots_left = 17
-strlen(tokens->front()) = 2
-Next token: me	strlen: 2
-space_slots: 4	spaces_per_slot: 4	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-Did	3
-you	3
-stand	5
-by	2
-me	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: Did	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 3
-Next token: you	strlen: 3
-space_slots = 2	slots_left = 24
-strlen(tokens->front()) = 5
-Next token: stand	strlen: 5
-space_slots = 3	slots_left = 19
-strlen(tokens->front()) = 2
-Next token: by	strlen: 2
-space_slots = 4	slots_left = 17
-strlen(tokens->front()) = 2
-Next token: me	strlen: 2
-space_slots: 4	spaces_per_slot: 4	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-You	3
-must	4
-explain	7
-why	3
-this	4
-must	4
-be	2
-Let's generate a paragraph...
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 3
-Next token: You	strlen: 3
-space_slots = 1	slots_left = 27
-strlen(tokens->front()) = 4
-Next token: must	strlen: 4
-space_slots = 2	slots_left = 23
-strlen(tokens->front()) = 7
-Next token: explain	strlen: 7
-space_slots = 3	slots_left = 16
-strlen(tokens->front()) = 3
-Next token: why	strlen: 3
-space_slots = 4	slots_left = 13
-strlen(tokens->front()) = 4
-Next token: this	strlen: 4
-space_slots = 5	slots_left = 9
-space_slots: 5	spaces_per_slot: 1	remaining_spaces: 4
-space_slots = 0	slots_left = 30
-strlen(tokens->front()) = 4
-Next token: must	strlen: 4
-space_slots = 1	slots_left = 26
-strlen(tokens->front()) = 2
-Next token: be	strlen: 2
-space_slots: 1	spaces_per_slot: 1	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
-Empty line...
+ThisIsAReallyL-
+ongLineThatMig-
+htHaveToStretc-
+hOutABit
+
+ThisIsExactly15
+
+Foo!
+
+You  say you stand by your man
+Tell   me  something  I  don't
+understand  You  said you love
+me  and that's a fact And then
+you  left  me,  said  you felt
+trapped
+
+Well   some   things  you  can
+explain away But the heartach-
+e's   in   me  till  this  day
+
+Did you stand by me No, not at
+all Did you stand by me No way
+
+All  the  times  When  we were
+close   I'll   remember  these
+things  the  most I see all my
+dreams  come  tumbling  down I
+can't  be  happy  without  you
+around
+
+So all alone I keep the wolves
+at  bay  And there is only one
+thing that I can say
+
+Did you stand by me No, not at
+all Did you stand by me No way
+
+You must explain why this must
+be  Did you lie when you spoke
+to me
+
+Did you stand by me No, not at
+all
+
+Now  I  got a job But it don't
+pay  I need new clothes I need
+somewhere  to stay But without
+all  these things I can do But
+without your love I won't make
+it through
+
+But  you  don't  understand my
+point   of   view   I  suppose
+there's   nothing   I  can  do
+
+Did you stand by me No, not at
+all Did you stand by me No way
+
+Did you stand by me No, not at
+all Did you stand by me No way
+
+You must explain why this must
+be  Did you lie when you spoke
+to me?
+
+Did  you stand by me
+Did  you stand by me
+No,  not  at all Did
+you  stand  by me No
+way Did you stand by
+me  No,  not  at all
+Did  you stand by me
+No way
+

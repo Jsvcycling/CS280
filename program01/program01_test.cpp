@@ -28,10 +28,6 @@ void split_word(std::list<char *> *tokens, int word_len) {
 	tokens->push_front(second_part);
 	tokens->push_front(first_part);
 
-#ifdef DEBUG
-	printf("word = %s\tfirst_part = %s\tsecond_part = %s\n", word, first_part, second_part);
-#endif
-
 	free(word);
 }
 
@@ -53,14 +49,16 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			slots_left -= strlen(tokens->front());
 			print_list.push_back(tokens->front());
 			tokens->pop_front();
-		} else if ((print_list.size() * 3) < (slots_left)) {
+		} else if (strlen(tokens->front()) > line_len) {
+			split_word(tokens, line_len);
+		} else if (((print_list.size() - 1) * 3) < slots_left) {
 			split_word(tokens, (slots_left - print_list.size()));
 		} else {
 			break;
 		}
 	}
-
-	if (print_list.size() == 1 && slots_left <= 3) {
+	
+	if (print_list.size() == 1 && slots_left < 3) {
 		for (int i = 0; i < slots_left; i++) {
 			printf(" ");
 		}
@@ -83,7 +81,7 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		}
 
 #ifdef DEBUG
-		printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", space_slots, spaces_per_slot, remaining_spaces, slots_left, line_len - slots_left);
+		printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", (int)print_list.size() - 1, spaces_per_slot, remaining_spaces, slots_left, line_len - (int)(print_list.size() - 1));
 #endif
 
 		while (print_list.size() > 0) {
@@ -118,14 +116,17 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 	while (true) {
 		if (fgets(buf, 256, filePtr)) {
 			if (strlen(buf) <= 1) {
+#ifdef DEBUG
+				printf("token_list.size() = %i\n", (int)token_list.size());
+
+				for (std::list<char *>::iterator it = token_list.begin(); it != token_list.end(); ++it) {
+					printf("token = %s\n", *it);
+				}
+#endif
 				generate = (token_list.size() > 0);
 				break;
 			}
-			
-#ifdef DEBUG
-			printf("Line: %s\n", buf);
-#endif
-			
+		    
 			char tokbuf[256];
 			strcpy(tokbuf, buf);
 			char *token = strtok(tokbuf, " \t\n");
@@ -140,12 +141,12 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 
 							if (new_len >= 10 && new_len <= 120) {
 								next_line_len = new_len;
+								generate = (token_list.size() > 0);
 							}
 						}
 					}
 				}
-
-				generate = (token_list.size() > 0);
+				
 				break;
 			} else {
 				while (token != NULL) {
@@ -182,9 +183,6 @@ int main(int argc, char **argv) {
 	int line_len = 60;
 
 	while (!feof(filePtr)) {
-#ifdef DEBUG
-		printf("Parse a paragraph...\n");
-#endif
 		parse_paragraph(filePtr, &line_len);
 	}
 

@@ -1,89 +1,38 @@
-Ozymandias	10
-Let's generate a paragraph...
-space_slots = 0	slots_left = 60
-strlen(tokens->front()) = 10
-Next token: Ozymandias	strlen: 10
-space_slots: 0	spaces_per_slot: 0	remaining_spaces: 0
-Empty line...
-Percy	5
-Bysshe	6
-Shelley,	8
-1792	4
--	1
-1822	4
-Let's generate a paragraph...
-space_slots = 0	slots_left = 60
-strlen(tokens->front()) = 5
-Next token: Percy	strlen: 5
-space_slots = 1	slots_left = 55
-strlen(tokens->front()) = 6
-Next token: Bysshe	strlen: 6
-space_slots = 2	slots_left = 49
-strlen(tokens->front()) = 8
-Next token: Shelley,	strlen: 8
-space_slots = 3	slots_left = 41
-strlen(tokens->front()) = 4
-Next token: 1792	strlen: 4
-space_slots = 4	slots_left = 37
-strlen(tokens->front()) = 1
-Next token: -	strlen: 1
-space_slots = 5	slots_left = 36
-strlen(tokens->front()) = 4
-Next token: 1822	strlen: 4
-space_slots: 5	spaces_per_slot: 5	remaining_spaces: 0
-Empty line...
-token is line length change... invalid line length (5).
-token is line length change... invalid line length (173).
-token is line length change... invalid line length (0).
-token is line length change... invalid line length command.
-I	1
-met	3
-a	1
-traveller	9
-from	4
-an	2
-antique	7
-land	4
-Let's generate a paragraph...
-space_slots = 0	slots_left = 60
-strlen(tokens->front()) = 1
-Next token: I	strlen: 1
-space_slots = 1	slots_left = 59
-strlen(tokens->front()) = 3
-Next token: met	strlen: 3
-space_slots = 2	slots_left = 56
-strlen(tokens->front()) = 1
-Next token: a	strlen: 1
-space_slots = 3	slots_left = 55
-strlen(tokens->front()) = 9
-Next token: traveller	strlen: 9
-space_slots = 4	slots_left = 46
-strlen(tokens->front()) = 4
-Next token: from	strlen: 4
-space_slots = 5	slots_left = 42
-strlen(tokens->front()) = 2
-Next token: an	strlen: 2
-space_slots = 6	slots_left = 40
-strlen(tokens->front()) = 7
-Next token: antique	strlen: 7
-space_slots = 7	slots_left = 33
-strlen(tokens->front()) = 4
-Next token: land	strlen: 4
-space_slots: 7	spaces_per_slot: 7	remaining_spaces: 0
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Let's generate a paragraph...
-Empty line...
+Ozymandias
+
+Percy Bysshe Shelley, 1792 - 1822
+
+I  met  a traveller from an antique land Who said: "Two vast
+and  trunkless  legs of stone Stand in the desert . . . Near
+them, on the sand,
+
+Half sunk,
+a shatter-
+ed  visage
+lies, who-
+se  frown,
+And wrink-
+led   lip,
+and  sneer
+of cold
+  command,
+Tell  that
+its sculp-
+tor   well
+those pas-
+sions read
+Which  yet
+  survive,
+stamped on
+these lif-
+eless thi-
+ngs,
+
+The hand that mocked them, and the heart
+that  fed:  And  on  the  pedestal these
+words  appear:  'My  name is Ozymandias,
+king of kings:
+
+Look  on  my works, ye Mighty, and despair!' Nothing beside remains. Round the decay Of that colossal wreck, boundless
+and bare The lone and level sands stretch far away."
+
