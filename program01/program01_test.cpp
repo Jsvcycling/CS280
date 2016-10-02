@@ -149,12 +149,11 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 							if (new_len >= 10 && new_len < 120) {
 								next_line_len = new_len;
 								generate = (token_list.size() > 0);
+								break;
 							}
 						}
 					}
 				}
-				
-				break;
 			} else {
 				while (token != NULL) {
 					char *str = (char *)malloc(sizeof(char) * strlen(token));
