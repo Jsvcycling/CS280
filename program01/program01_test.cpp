@@ -1,11 +1,23 @@
+//-------------------------------------------------
+// Title: CS 280 Program 01
+// Author: Joshua Vega <jsv28@njit.edu>
+// Date: 2 October, 2016
+//-------------------------------------------------
+
+//-------------------------------------------------
+// To do:
+// - when running against p1-test2.in, the program
+//   splits the word "stamped" into "-" and
+//   "stamped", rather than just leaving the line
+//   as a single word (which is legal).
+//-------------------------------------------------
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #include <list>
-
-// #define DEBUG
 
 void split_word(std::list<char *> *tokens, int word_len) {
 	char *word = tokens->front();
@@ -58,14 +70,6 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		}
 	}
 
-#ifdef DEBUG
-	printf("print_list.size() = %i\n", (int)print_list.size());
-
-	for (std::list<char *>::iterator it = print_list.begin(); it != print_list.end(); ++it) {
-		printf("token = %s (size = %i)\n", *it, (int)strlen(*it));
-	}
-#endif
-
 	for (std::list<char *>::iterator it = print_list.begin(); it != print_list.end(); ++it) {
 		if (strlen(*it) < 1) {
 			it = print_list.erase(it);
@@ -93,10 +97,6 @@ void print_line(std::list<char *> *tokens, int line_len) {
 				remaining_spaces = slots_left - (spaces_per_slot * (print_list.size() - 1));
 			}
 		}
-
-#ifdef DEBUG
-		printf("space_slots: %d\tspaces_per_slot: %d\tremaining_spaces: %d\tslots_left: %d\tslots_used: %d\n", (int)print_list.size() - 1, spaces_per_slot, remaining_spaces, slots_left, line_len - (int)(print_list.size() - 1));
-#endif
 
 		while (print_list.size() > 0) {
 			char *str = print_list.front();
@@ -158,21 +158,18 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 			} else {
 				while (token != NULL) {
 					char *str = (char *)malloc(sizeof(char) * strlen(token));
-
-					if (str == NULL) {
-						printf("ERROR!\n");
-					}
 					
 					strcpy(str, token);
-						
 					token_list.push_back(str);
-					
 					token = strtok(NULL, " \t\n");
 				}
 			}
 		} else {
-			generate = (token_list.size() > 0);
-			break;
+			while (token_list.size() > 0) {
+				print_line(&token_list, *line_len);
+			}
+			
+			return;
 		}
 	}
 
