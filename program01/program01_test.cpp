@@ -10,9 +10,6 @@
 //   splits the word "stamped" into "-" and
 //   "stamped", rather than just leaving the line
 //   as a single word (which is legal).
-// - remaining_space placing isn't random, rather
-//   it merely places them beginning at the start
-//   of the line.
 //-------------------------------------------------
 
 #include <stdio.h>
@@ -92,31 +89,49 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		int spaces_per_slot = 0;
 		int remaining_spaces = 0;
 
+		bool use_remaining[print_list.size() - 1];
+		memset(use_remaining, false, print_list.size() - 1);
+
 		if (print_list.size() > 1) {
 			if (((print_list.size() - 1) * 3) < slots_left) {
 				spaces_per_slot = 1;
 			} else {
 				spaces_per_slot = slots_left / (print_list.size() - 1);
 				remaining_spaces = slots_left - (spaces_per_slot * (print_list.size() - 1));
+
+				srand(time(NULL));
+
+				for (int i = 0; i < remaining_spaces; i++) {
+					while (true) {
+						int idx = rand() % (print_list.size() - 1);
+
+						if (!use_remaining[idx]) {
+							use_remaining[idx] = true;
+							break;
+						}
+					}
+				}
 			}
 		}
 
+		int j = 0;
 		while (print_list.size() > 0) {
 			char *str = print_list.front();
 			print_list.pop_front();
 			printf("%s", str);
 			free(str);
 
-			for (int i = 0; i < spaces_per_slot; i++) {
+			for (int k = 0; k < spaces_per_slot; k++) {
 				if (print_list.size() > 0) {
 					printf(" ");
 				}
 			}
 
-			if (remaining_spaces > 0) {
+			if (use_remaining[j]) {
 				printf(" ");
-				remaining_spaces -= 1;
 			}
+
+			j++;
 		}
 
 		printf("\n");
