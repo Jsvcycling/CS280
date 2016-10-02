@@ -10,6 +10,9 @@
 //   splits the word "stamped" into "-" and
 //   "stamped", rather than just leaving the line
 //   as a single word (which is legal).
+// - remaining_space placing isn't random, rather
+//   it merely places them beginning at the start
+//   of the line.
 //-------------------------------------------------
 
 #include <stdio.h>
