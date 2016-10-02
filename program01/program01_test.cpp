@@ -57,6 +57,20 @@ void print_line(std::list<char *> *tokens, int line_len) {
 			break;
 		}
 	}
+
+#ifdef DEBUG
+	printf("print_list.size() = %i\n", (int)print_list.size());
+
+	for (std::list<char *>::iterator it = print_list.begin(); it != print_list.end(); ++it) {
+		printf("token = %s (size = %i)\n", *it, (int)strlen(*it));
+	}
+#endif
+
+	for (std::list<char *>::iterator it = print_list.begin(); it != print_list.end(); ++it) {
+		if (strlen(*it) < 1) {
+			it = print_list.erase(it);
+		}
+	}
 	
 	if (print_list.size() == 1 && slots_left < 3) {
 		for (int i = 0; i < slots_left; i++) {
@@ -66,7 +80,7 @@ void print_line(std::list<char *> *tokens, int line_len) {
 		char *str = print_list.front();
 		print_list.pop_front();
 		printf("%s\n", str);
-		free(str);
+		// free(str);
 	} else {
 		int spaces_per_slot = 0;
 		int remaining_spaces = 0;
@@ -116,13 +130,6 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 	while (true) {
 		if (fgets(buf, 256, filePtr)) {
 			if (strlen(buf) <= 1) {
-#ifdef DEBUG
-				printf("token_list.size() = %i\n", (int)token_list.size());
-
-				for (std::list<char *>::iterator it = token_list.begin(); it != token_list.end(); ++it) {
-					printf("token = %s\n", *it);
-				}
-#endif
 				generate = (token_list.size() > 0);
 				break;
 			}
@@ -139,7 +146,7 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 						if (strlen(buf) == (strlen(".ll ") + strlen(token) + 1)) {
 						    int new_len = atoi(token);
 
-							if (new_len >= 10 && new_len <= 120) {
+							if (new_len >= 10 && new_len < 120) {
 								next_line_len = new_len;
 								generate = (token_list.size() > 0);
 							}
@@ -151,9 +158,15 @@ void parse_paragraph(FILE *filePtr, int *line_len) {
 			} else {
 				while (token != NULL) {
 					char *str = (char *)malloc(sizeof(char) * strlen(token));
-					strcpy(str, token);
 
+					if (str == NULL) {
+						printf("ERROR!\n");
+					}
+					
+					strcpy(str, token);
+						
 					token_list.push_back(str);
+					
 					token = strtok(NULL, " \t\n");
 				}
 			}
