@@ -4,14 +4,6 @@
 // Date: 2 October, 2016
 //-------------------------------------------------
 
-//-------------------------------------------------
-// To do:
-// - when running against p1-test2.in, the program
-//   splits the word "stamped" into "-" and
-//   "stamped", rather than just leaving the line
-//   as a single word (which is legal).
-//-------------------------------------------------
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
