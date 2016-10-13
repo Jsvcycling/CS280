@@ -32,8 +32,8 @@ public:
 	Token() : tok(ERR), lexeme("") {}
 	Token(TokenType t, std::string s) : tok(t), lexeme(s) {}
 
-	TokenType	getTok()	{ return tok; }
-	std::string	getLexeme()	{ return lexeme; }
+	TokenType	getTok() const		{ return tok; }
+	std::string	getLexeme() const	{ return lexeme; }
 
 	friend bool operator==(const Token& left, const Token& right) {
 		return left.tok == right.tok;

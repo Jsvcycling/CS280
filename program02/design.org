@@ -1,0 +1,13 @@
+* Lexical Rules
+
+1. The language has identifiers. Identifiers are [a-zA-z][a-zA-z]* in regex.
+2. The language has string constants. String constants are
+   "[a-zA-z0-9!@#$%^&*(){}[]:\";',./<>?~`\\|]*" in regex.
+3. The language has integer constants. Integer constants are [0-9]+ in regex.
+4. The language has 3 operators: +, *, and [] (array index).
+5. The language has 2 keywords: print and set.
+6. Statements end with a semicolon (;).
+7. The language supports parantheses.
+8. Whitespace is irrelavent.
+9. Comments begin with two slashes (//) and end at the end of the line (C++ style).
+
