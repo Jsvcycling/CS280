@@ -1,6 +1,7 @@
 #include "p2lex.h"
 
 #include <vector>
+#include <string>
 
 std::ostream &operator <<(std::ostream &out, const Token &t) {
 	switch (t.getTok()) {
@@ -28,7 +29,7 @@ std::ostream &operator <<(std::ostream &out, const Token &t) {
 Token getToken(std::istream * instream) {
 	bool seen_chars = false;
 	bool finish_clean = false;
-	std::vector<char> chars;
+	std::string str;
 	TokenType type;
 	char c;
 
@@ -43,7 +44,7 @@ Token getToken(std::istream * instream) {
 				while (instream.get() != '\n');
 			} else {
 				seen_chars = true;
-				chars.push_back(c);
+				str.append(c);
 				type = ERR;
 			}
 		} else if (c == '"') {
@@ -58,61 +59,61 @@ Token getToken(std::istream * instream) {
 			// The character is an ASCII number...
 			if (seen_chars) {
 				if (type == STR || type == INT) {
-					chars.push_back(c);
+					str.append(c);
 				} else {
-					chars.push_back(c);
+					str.append(c);
 					type == ERR;
 				}
 			} else {
 				seen_chars = true;
-				chars.push_back(c);
+				str.append(c);
 				type = INT;
 			}	
 		} else if (c == "+") {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(PLUS, c);
 			}
 		} else if (c == "*") {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(STAR, c);
 			}
 		} else if (c == "[") {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(LEFTSQ, c);
 			}
 		} else if (c == "]") {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(RIGHTSQ, c);
 			}
 		} else if (c == ';') {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(SC, c);
 			}
 		} else if (c == '(') {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(LPAREN, c);
 			}
 		} else if (c == ')') {
 			if (seen_chars) {
-				if (type == STR) { chars.push_back(c); }
+				if (type == STR) { str.append(c); }
 				else { instream.unget(); break; }
 			} else {
 				return Token(RPAREN, c);
@@ -120,28 +121,38 @@ Token getToken(std::istream * instream) {
 		} else if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
 			// All letters characters...
 			if (seen_chars) {
-				chars.push_back(c);
+				str.append(c);
 			} else {
 				seen_chars = true;
-				chars.push_back(c);
+				str.append(c);
 				type = ID;
 			}
 		} else {
 			// All other characters...
 			if (seen_chars) {
 				if (type == STR) {
-					chars.push_back(c);
+					str.append(c);
 				} else {
-					chars.push_back(c);
+					str.append(c);
 					type = ERR;
 				}
 			} else {
 				seen_chars = true;
-				chars.push_back(c);
+				str.append(c);
 				type = ERR;
 			}
 		}			
 	}
 
-	// TODO: Token generation
+	if (seen_chars) {
+		if (type == STR) {
+			if (finish_clean) {
+				return Token(type, str);
+			} else {
+				return Token(ERR, str);
+			}
+		} else {
+			return Token(type, str);
+		}
+	}		
 }
