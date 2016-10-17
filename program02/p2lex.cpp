@@ -5,9 +5,9 @@
 
 std::ostream &operator <<(std::ostream &out, const Token &t) {
 	switch (t.getTok()) {
-	case ID: out << "id (" << t.GetLexeme() << ")"; break;
-	case STR: out << "str (" << t.GetLexeme() << ")"; break;
-	case INT: out << "int (" << t.GetLexeme() << ")"; break;
+	case ID: out << "id(" << t.GetLexeme() << ")"; break;
+	case STR: out << "str(\"" << t.GetLexeme() << "\")"; break;
+	case INT: out << "int(" << t.GetLexeme() << ")"; break;
 	case PLUS: out << "plus"; break;
 	case STAR: out << "star"; break;
 	case LEFTSQ: out << "leftsq"; break;
@@ -18,7 +18,7 @@ std::ostream &operator <<(std::ostream &out, const Token &t) {
 	case LPAREN: out << "lparen"; break;
 	case RPAREN: out << "rparen"; break;
 	case DONE: out << "done"; break;
-	case ERR: out << "err (" << t.GetLexeme() << ")"; break;
+	case ERR: out << "err(" << t.GetLexeme() << ")"; break;
 	default: break;
 	}
 
