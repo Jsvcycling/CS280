@@ -3,11 +3,13 @@
 #include <vector>
 #include <string>
 
+int linenum = 0;
+
 std::ostream &operator <<(std::ostream &out, const Token &t) {
 	switch (t.getTok()) {
-	case ID: out << "id(" << t.GetLexeme() << ")"; break;
-	case STR: out << "str(\"" << t.GetLexeme() << "\")"; break;
-	case INT: out << "int(" << t.GetLexeme() << ")"; break;
+	case ID: out << "id(" << t.getLexeme() << ")"; break;
+	case STR: out << "str(\"" << t.getLexeme() << "\")"; break;
+	case INT: out << "int(" << t.getLexeme() << ")"; break;
 	case PLUS: out << "plus"; break;
 	case STAR: out << "star"; break;
 	case LEFTSQ: out << "leftsq"; break;
@@ -18,39 +20,48 @@ std::ostream &operator <<(std::ostream &out, const Token &t) {
 	case LPAREN: out << "lparen"; break;
 	case RPAREN: out << "rparen"; break;
 	case DONE: out << "done"; break;
-	case ERR: out << "err(" << t.GetLexeme() << ")"; break;
+	case ERR: out << "err(" << t.getLexeme() << ")"; break;
 	default: break;
 	}
 
 	return out;
 }
 
-
-Token getToken(std::istream * instream) {
+Token getToken(std::istream *instream) {
 	bool seen_chars = false;
 	bool finish_clean = false;
 	std::string str;
 	TokenType type;
 	char c;
 
-	while (instream.get(c)) {
+	while (instream->get(c)) {
 		if (c == ' ' || c == '\t') {
 			if (seen_chars) {
 				break;
 			}
+		} else if (c == '\n') {
+			linenum += 1;
+			
+			if (seen_chars) {
+				break;
+			}
 		} else if (c == '/') {
-			if (instream.get() == '/') {
+			if (instream->get() == '/') {
 				// This line is a comment so skip it...
-				while (instream.get() != '\n');
+				while (instream->get() != '\n');
 			} else {
 				seen_chars = true;
-				str.append(c);
+				str.append(&c);
 				type = ERR;
 			}
 		} else if (c == '"') {
-			if (seen_chars && is_string) {
-				finish_clean = true;
-				break;
+			if (seen_chars) {
+				if (type == STR) {
+					finish_clean = true;
+					break;
+				} else {
+					type = ERR;
+				}
 			} else {
 				seen_chars = true;
 				type = STR;
@@ -59,86 +70,86 @@ Token getToken(std::istream * instream) {
 			// The character is an ASCII number...
 			if (seen_chars) {
 				if (type == STR || type == INT) {
-					str.append(c);
+					str.append(&c);
 				} else {
-					str.append(c);
+					str.append(&c);
 					type == ERR;
 				}
 			} else {
 				seen_chars = true;
-				str.append(c);
+				str.append(&c);
 				type = INT;
 			}	
-		} else if (c == "+") {
+		} else if (c == '+') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(PLUS, c);
+				return Token(PLUS, &c);
 			}
-		} else if (c == "*") {
+		} else if (c == '*') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(STAR, c);
+				return Token(STAR, &c);
 			}
-		} else if (c == "[") {
+		} else if (c == '[') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(LEFTSQ, c);
+				return Token(LEFTSQ, &c);
 			}
-		} else if (c == "]") {
+		} else if (c == ']') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(RIGHTSQ, c);
+				return Token(RIGHTSQ, &c);
 			}
 		} else if (c == ';') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(SC, c);
+				return Token(SC, &c);
 			}
 		} else if (c == '(') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(LPAREN, c);
+				return Token(LPAREN, &c);
 			}
 		} else if (c == ')') {
 			if (seen_chars) {
-				if (type == STR) { str.append(c); }
-				else { instream.unget(); break; }
+				if (type == STR) { str.append(&c); }
+				else { instream->unget(); break; }
 			} else {
-				return Token(RPAREN, c);
+				return Token(RPAREN, &c);
 			}
 		} else if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
 			// All letters characters...
 			if (seen_chars) {
-				str.append(c);
+				str.append(&c);
 			} else {
 				seen_chars = true;
-				str.append(c);
+				str.append(&c);
 				type = ID;
 			}
 		} else {
 			// All other characters...
 			if (seen_chars) {
 				if (type == STR) {
-					str.append(c);
+					str.append(&c);
 				} else {
-					str.append(c);
+					str.append(&c);
 					type = ERR;
 				}
 			} else {
 				seen_chars = true;
-				str.append(c);
+				str.append(&c);
 				type = ERR;
 			}
 		}			
