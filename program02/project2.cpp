@@ -10,13 +10,14 @@
 int main(int argc, char **argv) {
 	bool verbose = false;
 
-	if (argc < 2) exit(EXIT_FAILURE);
+	if (argc < 2 || argc > 3) exit(EXIT_FAILURE);
 
 	// Check for the verbose parameter
 	if (argc == 3 && strcmp(argv[1], "-v") == 0) {
 		verbose = true;
 	}
 
+	std::list<Token> tokens;
 	std::map<std::string, bool> unique_id;
 	std::map<std::string, bool> unique_str;
 	std::map<std::string, bool> unique_int;
@@ -31,14 +32,11 @@ int main(int argc, char **argv) {
 		file.open(argv[1], std::ifstream::in);
 	}
 
-	Token token = getToken(file);
+	Token token = getToken(&file);
 	
 	while (token.getTok() != ERR && token.getTok() != DONE) {
-		if (verbose) {
-			std::cout << token;
-		}
-
-		token_count[token.geTok()] += 1;
+		tokens.push_back(token);
+		token_count[token.getTok()] += 1;
 
 		if (token.getTok() == ID) {
 			if (!unique_id[token.getLexeme()]) {
@@ -58,7 +56,18 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		token = getToken(file);
+		token = getToken(&file);
+	}
+
+	if (token.getTok() == ERR) {
+		std::cout << token << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (verbose) {
+		for (Token t : tokens) {
+			std::cout << t << std::endl;
+		}
 	}
 
 	if (token_count[ID] > 0) std::cout << "id: " << token_count[ID] << std::endl;
@@ -74,9 +83,9 @@ int main(int argc, char **argv) {
 	if (token_count[LPAREN] > 0) std::cout << "lparen: " << token_count[LPAREN] << std::endl;
 	if (token_count[RPAREN] > 0) std::cout << "rparen: " << token_count[RPAREN] << std::endl;
 
-	if (unique_id.size() > 0) std::cout << "Number of unique lexemes for id: " << unique_id.size() << std::endl;
-	if (unique_str.size() > 0) std::cout << "Number of unique lexemes for str: " << unique_str.size() << std::endl;
-	if (unique_int.size() > 0) std::cout << "Number of unique lexemes for int: " << unique_int.size() << std::endl;
+	std::cout << "Number of unique lexemes for id: " << unique_id.size() << std::endl;
+	std::cout << "Number of unique lexemes for str: " << unique_str.size() << std::endl;
+	std::cout << "Number of unique lexemes for int: " << unique_int.size() << std::endl;
 
 	file.close();
 
