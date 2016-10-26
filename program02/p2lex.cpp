@@ -80,7 +80,7 @@ Token getToken(std::istream *instream) {
 					str += c;
 				} else {
 					str += c;
-					type == ERR;
+					type = ERR;
 				}
 			} else {
 				seen_chars = true;
