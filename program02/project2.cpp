@@ -3,14 +3,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <istream>
 #include <fstream>
 #include <list>
 #include <map>
 
+int linenum = 0;
+
 int main(int argc, char **argv) {
+	bool use_stdin = false;
 	bool verbose = false;
 
-	if (argc < 2 || argc > 3) exit(EXIT_FAILURE);
+	if (argc < 2) {
+		use_stdin = true;
+	}
+	
+	if (argc > 3) {
+		std::cout << "Error: Too many arguments." << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	// Check for the verbose parameter
 	if (argc == 3 && strcmp(argv[1], "-v") == 0) {
@@ -26,13 +37,26 @@ int main(int argc, char **argv) {
 
 	std::ifstream file;
 
-	if (verbose) {
-		file.open(argv[2], std::ifstream::in);
-	} else {
-		file.open(argv[1], std::ifstream::in);
-	}
+	std::istream *strm;
 
-	Token token = getToken(&file);
+	if (use_stdin) {
+		strm = &(std::cin);
+	} else {
+		if (verbose) {
+			file.open(argv[2], std::ifstream::in);
+		} else {
+			file.open(argv[1], std::ifstream::in);
+		}
+		
+		if (file.fail()) {
+			std::cout << "Error: File does not exist." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		strm = &file;
+	}
+	
+	Token token = getToken(strm);
 	
 	while (token.getTok() != ERR && token.getTok() != DONE) {
 		tokens.push_back(token);
@@ -56,7 +80,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		token = getToken(&file);
+		token = getToken(strm);
 	}
 
 	if (token.getTok() == ERR) {

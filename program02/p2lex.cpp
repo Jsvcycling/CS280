@@ -4,8 +4,6 @@
 #include <string>
 #include <stdio.h>
 
-int linenum = 0;
-
 std::ostream &operator <<(std::ostream &out, const Token &t) {
 	switch (t.getTok()) {
 	case ID: out << "id(" << t.getLexeme().c_str() << ")"; break;
