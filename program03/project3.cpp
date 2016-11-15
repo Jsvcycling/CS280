@@ -66,11 +66,13 @@ ParseTree *Program(istream *in);
 ParseTree *StmtList(istream *in);
 ParseTree *Stmt(istream *in);
 ParseTree *Expr(istream *in);
+ParseTree *Expr2(istream *in);
 ParseTree *Term(istream *in);
+ParseTree *Term2(istream *in);
 ParseTree *Primary(istream *in);
 ParseTree *String(istream *in);
 
-/* Program -> <StmtList> */
+/* <Program> -> <StmtList> */
 ParseTree *Program(istream *in) {
 	ParseTree *result = StmtList(in);
 
@@ -82,17 +84,15 @@ ParseTree *Program(istream *in) {
 	return result;
 }
 
-/* StmtList -> <Stmt> | <Stmt> <StmtList> */
+/* <StmtList> -> <Stmt> | <Stmt> <StmtList> */
 ParseTree *StmtList(istream *in) {
 	ParseTree *left = Stmt(in);
-
-	// TODO: Somehow we have to do right as well...
-	ParseTree *right = 0;
+	ParseTree *right = StmtList(in);
 
 	return new ParseTree(left, right);
 }
 
-/* Stmt -> PRINT <Expr> SC | SET ID <Expr> SC */
+/* <Stmt> -> PRINT <Expr> SC | SET ID <Expr> SC */
 ParseTree *Stmt(istream *in) {
 	Token t;
 
@@ -136,24 +136,72 @@ ParseTree *Stmt(istream *in) {
 		}
 
 		return new ParseTree(left, right);
-	} else {
-		error("Invalid statement");
+	}
+	
+
+	error("Invalid statement");
+	return 0;
+}
+
+/* <Expr> -> <Term> <Expr'> */
+ParseTree *Expr(istream *in) {
+	ParseTree *left = Term(in);
+
+	if (left == 0) {
+		return 0;
+	}
+
+	ParseTree *right = Expr2(in);
+
+	if (right == 0) {
+		return 0;
+	}
+
+	return new ParseTree(left, right);
+}
+
+/* <Expr'> -> EOL | + <Term> <Expr'> */
+/* <Expr'> -> EOL | + <Expr> */
+ParseTree *Expr2(istream *in) {
+	Token t = getToken(in);
+
+	if (t.getTok() == PLUS) {
+		return Expr(in);
 	}
 
 	return 0;
 }
 
-/* Expr -> <Expr> PLUS <Term> | <Term> */
-ParseTree *Expr(istream *in) {
-	return 0;
-}
-
-/* Term -> <Term> STAR <Primary> | <Primary> */
+/* <Term> -> <Primary> <Term'> */
 ParseTree *Term(istream *in) {
+	ParseTree *left = Primary(in);
+
+	if (left == 0) {
+		return 0;
+	}
+
+	ParseTree *right = Term2(in);
+
+	if (right == 0) {
+		return 0;
+	}
+
+	return new ParseTree(left, right);
+}
+
+/* <Term'> -> EOL | * <Primary> <Term'> */
+/* <Term'> -> EOL | * <Term> */
+ParseTree *Term2(istream *in) {
+	Token t = getToken(in);
+
+	if (t.getTok() == STAR) {
+		return Term(in);
+	}
+
 	return 0;
 }
 
-/* Primary -> ID | <String> | INT | LPAREN <Expr> RPAREN */
+/* <Primary> -> ID | <String> | INT | LPAREN <Expr> RPAREN */
 ParseTree *Primary(istream *in) {
 	Token t = getToken(in);
 
@@ -172,7 +220,7 @@ ParseTree *Primary(istream *in) {
 			return 0;
 		}
 		
-		ParseTree *ex = Expr(in);
+		ParseTree *left = Expr(in);
 		
 		if (ex == 0) {
 			return 0;
@@ -185,22 +233,45 @@ ParseTree *Primary(istream *in) {
 			return 0;
 		}
 
-		return ex;
+		return new ParseTree(left);
 	}
 
 	return 0;
 }
 
-/* String -> STR | STR LEFTSQ <Expr> RIGHTSQ | STR LEFTSQ <Expr> SC <Expr> RIGHTSQ */
+/* <String> -> STR | STR LEFTSQ <Expr> RIGHTSQ | STR LEFTSQ <Expr> SC <Expr> RIGHTSQ */
 ParseTree *String(istream *in) {
 	Token t = getToken(in);
 
 	if (t.getTok() == STR) {
-		// TODO: we have to peek forward and check for a left square bracket...
-	} else {
-		error("expected string");
-		return 0;
+		Token t1 = getToken(in);
+
+		if (t1.getTok() == LEFTSQ) {
+			ParseTree *left = Expr(in);
+
+			t1 = getToken(in);
+
+			if (t1.getTok() == RIGHTSQ) {
+				return Str(t, left);
+			} else if (t1.getTok() == SC) {
+				ParseTree *right = Expr(in);
+
+				t1 = getToken(in);
+
+				if (t1.getTok() == RIGHTSQ) {
+					return new Str(t, left, right);
+				}
+			}
+
+			error("expected right square bracket");
+			return 0;
+		}
+
+		return Str(t);
 	}
+	
+	error("expected string");
+	return 0;
 }
 
 int main(int argc, char **argv) {
