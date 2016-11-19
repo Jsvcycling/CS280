@@ -31,3 +31,13 @@ Condensed:
 <Term'> ::= EOL | * <Term>
 <Primary> ::= ID | <String> | INT | ( <Expr> )
 <String> ::= STR | STR [ <Expr> ] | STR [ <Expr> ; <Expr> ]
+
+EBNF:
+
+<Program> ::= <StmtList>
+<StmtList> ::= <Stmt> {<Stmt>}
+<Stmt> ::= PRINT <Expr> ; | SET ID <Expr> ;
+<Expr> ::= <Term> {+ <Term>}
+<Term> ::= <Primary> {* <Primary>}
+<Primary> ::= ID | <String> | INT | ( <Expr> )
+<String> ::= STR | STR[ <Expr> ] | STR[ <Expr> ; <Expr> ]

@@ -1,9 +1,12 @@
 #include "p2lex.h"
+
 #include <string>
 #include <istream>
 #include <fstream>
+
 using namespace std;
 
+// ParseTree object base class
 class ParseTree {
 private:
 	ParseTree *leftChild;
@@ -16,7 +19,43 @@ public:
 		whichLine = linenum;
 	}
 
+	ParseTree *left() { return leftChild; }
+	ParseTree *right() { return rightChild; }
+
 	int onWhichLine() { return whichLine; }
+};
+
+// PLUS operator
+class PlusOp : public ParseTree {
+private:
+	Token tok;
+	
+public:
+	PlusOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) { }
+};
+
+// STAR operator
+class StarOp : public ParseTree {
+private:
+	Token tok;
+	
+public:
+	StarOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) { }
+};
+
+// Print statement
+class PrintStmt : public ParseTree {
+public:
+	PrintStmt(ParseTree *expr) : ParseTree(expr) { }
+};
+
+// Set statement
+class SetStmt : public ParseTree {
+private:
+	Token tok;
+	
+public:
+	PrintStmt(const Token &t, ParseTree *expr) : ParseTree(expr), tok(t) { }
 };
 
 // An identifier
@@ -66,13 +105,33 @@ ParseTree *Program(istream *in);
 ParseTree *StmtList(istream *in);
 ParseTree *Stmt(istream *in);
 ParseTree *Expr(istream *in);
-ParseTree *Expr2(istream *in);
 ParseTree *Term(istream *in);
-ParseTree *Term2(istream *in);
 ParseTree *Primary(istream *in);
 ParseTree *String(istream *in);
 
-/* <Program> -> <StmtList> */
+Token savedToken;
+bool hasSavedToken = false;
+
+Token doGetToken(istream *in) {
+	if (hasSavedToken) {
+		hasSavedToken = false;
+		return savedToken;
+	}
+
+	return getToken(in);
+}
+
+void saveToken(Token &t) {
+	if (hasSavedToken) {
+		error("a token was already save");
+		return;
+	}
+
+	savedToken = t;
+	hasSavedToken = true;
+}
+
+/* <Program> := <StmtList> */
 ParseTree *Program(istream *in) {
 	ParseTree *result = StmtList(in);
 
@@ -84,7 +143,7 @@ ParseTree *Program(istream *in) {
 	return result;
 }
 
-/* <StmtList> -> <Stmt> | <Stmt> <StmtList> */
+/* <StmtList> := <Stmt> {<Stmt>} */
 ParseTree *StmtList(istream *in) {
 	ParseTree *left = Stmt(in);
 	ParseTree *right = StmtList(in);
@@ -92,11 +151,11 @@ ParseTree *StmtList(istream *in) {
 	return new ParseTree(left, right);
 }
 
-/* <Stmt> -> PRINT <Expr> SC | SET ID <Expr> SC */
+/* <Stmt> := PRINT <Expr> SC | SET ID <Expr> SC */
 ParseTree *Stmt(istream *in) {
 	Token t;
 
-	t = getToken(in);
+	t = doGetToken(in);
 
 	if (t.getTok() == PRINT) {
 		ParseTree *left = Expr(in);
@@ -105,16 +164,16 @@ ParseTree *Stmt(istream *in) {
 			return 0;
 		}
 
-		t = getToken(in);
+		t = doGetToken(in);
 
 		if (t.getTok() != SC) {
 			error("expected semicolon");
 			return 0;
 		}
 
-		return new ParseTree(left);
+		return new PrintStmt(left);
 	} else if (t.getTok() == SET) {
-		t = getToken(in);
+		t = doGetToken(in);
 
 		if (t.getTok() != ID) {
 			error("expected id");
@@ -128,92 +187,73 @@ ParseTree *Stmt(istream *in) {
 			return 0;
 		}
 
-		t = getToken(in);
+		t = doGetToken(in);
 
 		if (t.getTok() != SC) {
 			error("expected semicolon");
 			return 0;
 		}
 
-		return new ParseTree(left, right);
+		return new SetStmt(left, right);
 	}
 	
-
 	error("Invalid statement");
 	return 0;
 }
 
-/* <Expr> -> <Term> <Expr'> */
+/* <Expr> := <Term> {+ <Term>} */
 ParseTree *Expr(istream *in) {
 	ParseTree *left = Term(in);
 
-	if (left == 0) {
-		return 0;
-	}
-
-	ParseTree *right = Expr2(in);
-
-	if (right == 0) {
-		return 0;
-	}
-
-	return new ParseTree(left, right);
-}
-
-/* <Expr'> -> EOL | + <Term> <Expr'> */
-/* <Expr'> -> EOL | + <Expr> */
-ParseTree *Expr2(istream *in) {
-	Token t = getToken(in);
+	Token t = doGetToken(in);
 
 	if (t.getTok() == PLUS) {
-		return Expr(in);
+		ParseTree *right = Expr(in);
+
+		if (right == 0) {
+			return 0;
+		}
+
+		return new PlusOp(t, left, right);
 	}
 
-	return 0;
+	saveToken(t);
+	return left;
 }
 
-/* <Term> -> <Primary> <Term'> */
+/* <Term> := <Primary> {* <Primary>} */
 ParseTree *Term(istream *in) {
 	ParseTree *left = Primary(in);
 
-	if (left == 0) {
-		return 0;
-	}
-
-	ParseTree *right = Term2(in);
-
-	if (right == 0) {
-		return 0;
-	}
-
-	return new ParseTree(left, right);
-}
-
-/* <Term'> -> EOL | * <Primary> <Term'> */
-/* <Term'> -> EOL | * <Term> */
-ParseTree *Term2(istream *in) {
-	Token t = getToken(in);
+	Token t = doGetToken(in);
 
 	if (t.getTok() == STAR) {
-		return Term(in);
+		ParseTree *right = Term(in);
+
+		if (right == 0) {
+			return 0;
+		}
+
+		return new StarOp(t, left, right);
 	}
 
-	return 0;
+	saveToken(t);
+	return left;
 }
 
-/* <Primary> -> ID | <String> | INT | LPAREN <Expr> RPAREN */
+/* <Primary> := ID | <String> | INT | LPAREN <Expr> RPAREN */
 ParseTree *Primary(istream *in) {
-	Token t = getToken(in);
+	Token t = doGetToken(in);
 
 	if (t.getTok() == ID) {
 		return new Id(t);
 	} else if (t.getTok() == INT) {
 		return new Integer(t);
 	} else if (t.getTok() == STR) {
-		// We can't do this though since the token is already read...
+		saveToken(t);
 		return String(in);
 	} else if (t.getTok() == LPAREN) {
-		t = getTok(in);
+		t = doGetToken(in);
 
 		if (t.getTok() != ID) {
 			error("expected id");
@@ -226,22 +266,22 @@ ParseTree *Primary(istream *in) {
 			return 0;
 		}
 		
-		t = getToken(in);
+		t = doGetToken(in);
 		
 		if (t.getTok() != RPAREN) {
 			error("expected right parens");
 			return 0;
 		}
 
-		return new ParseTree(left);
+		return left;
 	}
 
 	return 0;
 }
 
-/* <String> -> STR | STR LEFTSQ <Expr> RIGHTSQ | STR LEFTSQ <Expr> SC <Expr> RIGHTSQ */
+/* <String> := STR | STR LEFTSQ <Expr> RIGHTSQ | STR LEFTSQ <Expr> SC <Expr> RIGHTSQ */
 ParseTree *String(istream *in) {
-	Token t = getToken(in);
+	Token t = doGetToken(in);
 
 	if (t.getTok() == STR) {
 		Token t1 = getToken(in);
@@ -274,6 +314,28 @@ ParseTree *String(istream *in) {
 	return 0;
 }
 
+int plusOpCount = 0;
+int starOpCount = 0;
+int bracketOpCount = 0;
+
+// For accumulating operator counts
+void traverseTree1(ParseTree *t) {
+	if (!t) return;
+	traverseTree1(t->left());
+	traverseTree1(t->right());
+
+	// TODO: get node information
+}
+
+// For error checking
+void traverseTree2(ParseTree *t) {
+	if (!t) return;
+	traverseTree2(t->left());
+	traverseTree2(t->right());
+
+	// TODO: check for errors
+}
+
 int main(int argc, char **argv) {
 	istream *in = &cin;
 	fstream infile;
@@ -299,6 +361,14 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
+	traverseTree1(prog);
+
+	cout << "Count of + operators: " << plusOpCount << endl;
+	cout << "Count of * operators: " << starOpCount << endl;
+	cout << "Count of [] operators: " << bracketOpCount << endl;
+	
+	traverseTree2(prog);
+	
 	cout << "Success. Congrats!" << endl;
 	return 0;
 }
