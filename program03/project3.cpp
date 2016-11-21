@@ -6,6 +6,18 @@
 
 using namespace std;
 
+enum NodeType {
+	GENERIC,
+	PLUS_OP,
+	STAR_OP,
+	BRACKET_OP,
+	PRINT_STMT,
+	SET_STMT,
+	ID_TYPE,
+	INT_TYPE,
+	STR_TYPE
+};
+
 // ParseTree object base class
 class ParseTree {
 private:
@@ -14,13 +26,19 @@ private:
 
 	int	whichLine;
 
+protected:
+	NodeType type;
+
 public:
 	ParseTree(ParseTree *left = 0, ParseTree *right = 0) : leftChild(left), rightChild(right) {
 		whichLine = linenum;
+		type = GENERIC;
 	}
 
 	ParseTree *left() { return leftChild; }
 	ParseTree *right() { return rightChild; }
+
+	NodeType getType() { return type; }
 
 	int onWhichLine() { return whichLine; }
 };
@@ -31,7 +49,9 @@ private:
 	Token tok;
 	
 public:
-	PlusOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) { }
+	PlusOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) {
+		type = PLUS_OP;
+	}
 };
 
 // STAR operator
@@ -40,22 +60,33 @@ private:
 	Token tok;
 	
 public:
-	StarOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) { }
+	StarOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) {
+		type = STAR_OP;
+	}
+};
+
+// BRACKET operator
+class BracketOp : public ParseTree {
+public:
+	BracketOp(ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right) {
+		type == BRACKET_OP;
+	}
 };
 
 // Print statement
 class PrintStmt : public ParseTree {
 public:
-	PrintStmt(ParseTree *expr) : ParseTree(expr) { }
+	PrintStmt(ParseTree *expr) : ParseTree(expr) {
+		type = PRINT_STMT;
+	}
 };
 
 // Set statement
 class SetStmt : public ParseTree {
-private:
-	Token tok;
-	
 public:
-	PrintStmt(const Token &t, ParseTree *expr) : ParseTree(expr), tok(t) { }
+	SetStmt(ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right) {
+		type = SET_STMT;
+	}
 };
 
 // An identifier
@@ -64,9 +95,11 @@ private:
 	Token tok;
 
 public:
-	Id(const Token &t) : ParseTree(), tok(t) { }
+	Id(const Token &t) : ParseTree(), tok(t) {
+		type = ID_TYPE;
+	}
 
-	string getId() { return t.getLexeme(); }
+	string getId() { return tok.getLexeme(); }
 };
 
 // An integer
@@ -75,9 +108,11 @@ private:
 	Token tok;
 
 public:
-	Integer(const Token &t) : ParseTree(), tok(t) { }
+	Integer(const Token &t) : ParseTree(), tok(t) {
+		type = INT_TYPE;
+	}
 
-	int getInteger() { return stoi(t.getLexeme()); }
+	int getInteger() { return stoi(tok.getLexeme()); }
 };
 
 // A string
@@ -86,9 +121,11 @@ private:
 	Token tok;
 
 public:
-	Str(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) { }
+	Str(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) {
+		type = STR_TYPE;
+	}
 
-	string getString() { return t.getLexeme() };
+	string getString() { return tok.getLexeme(); };
 };
 
 int linenum = 0;
@@ -160,7 +197,7 @@ ParseTree *Stmt(istream *in) {
 	if (t.getTok() == PRINT) {
 		ParseTree *left = Expr(in);
 
-		if (ex == 0) {
+		if (left == 0) {
 			return 0;
 		}
 
@@ -180,10 +217,10 @@ ParseTree *Stmt(istream *in) {
 			return 0;
 		}
 
-		ParseTree *left = Id(t);
+		ParseTree *left = new Id(t);
 		ParseTree *right = Expr(in);
 
-		if (ex == 0) {
+		if (left == 0 || right == 0) {
 			return 0;
 		}
 
@@ -262,7 +299,7 @@ ParseTree *Primary(istream *in) {
 		
 		ParseTree *left = Expr(in);
 		
-		if (ex == 0) {
+		if (left == 0) {
 			return 0;
 		}
 		
@@ -292,14 +329,16 @@ ParseTree *String(istream *in) {
 			t1 = getToken(in);
 
 			if (t1.getTok() == RIGHTSQ) {
-				return Str(t, left);
+				BracketOp *brackets = new BracketOp(left);
+				return new Str(t, brackets);
 			} else if (t1.getTok() == SC) {
 				ParseTree *right = Expr(in);
 
 				t1 = getToken(in);
 
 				if (t1.getTok() == RIGHTSQ) {
-					return new Str(t, left, right);
+					BracketOp *brackets = new BracketOp(left, right);
+					return new Str(t, brackets);
 				}
 			}
 
@@ -307,7 +346,7 @@ ParseTree *String(istream *in) {
 			return 0;
 		}
 
-		return Str(t);
+		return new Str(t);
 	}
 	
 	error("expected string");
@@ -324,7 +363,13 @@ void traverseTree1(ParseTree *t) {
 	traverseTree1(t->left());
 	traverseTree1(t->right());
 
-	// TODO: get node information
+	if (t->getType() == PLUS_OP) {
+		plusOpCount += 1;
+	} else if (t->getType() == STAR_OP) {
+		starOpCount += 1;
+	} else if (t->getType() == BRACKET_OP) {
+		bracketOpCount += 1;
+	}
 }
 
 // For error checking
