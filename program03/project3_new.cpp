@@ -44,7 +44,7 @@ protected:
 	Token tok;
 
 public:
-	ParseTreeToken(NodeType type, Token &t) : ParseTree(type), tok(t) { }
+	ParseTreeToken(NodeType type, Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(type, left, right), tok(t) { }
 
 	Token getToken() { return tok; }
 };
@@ -103,17 +103,10 @@ ParseTree *StmtList(std::istream *in) {
 	ParseTree *left = Stmt(in);
 
 	if (left == 0) {
-		// ERROR
 		return 0;
 	}
 	
 	ParseTree *right = StmtList(in);
-
-	if (right == 0) {
-		// ERROR
-		return 0;
-	}
-
 	return new ParseTree(GENERIC, left, right);
 }
 
@@ -125,11 +118,11 @@ ParseTree *Stmt(std::istream *in) {
 		ParseTree *left = Expr(in);
 
 		if (left == 0) {
-			// ERROR
+			error("Syntax error: invalid statement");
 			return 0;
 		}
 
-		t = doGetToken(in);
+		Token t = doGetToken(in);
 
 		if (t.getTok() != SC) {
 			error("Expected semicolon, received " + t.getLexeme() + ".");
@@ -149,7 +142,7 @@ ParseTree *Stmt(std::istream *in) {
 		ParseTree *right = Expr(in);
 
 		if (right == 0) {
-			// ERROR
+			error("Syntax error: invalid statement");
 			return 0;
 		}
 
@@ -160,19 +153,21 @@ ParseTree *Stmt(std::istream *in) {
 			return 0;
 		}
 
-		return new ParseTree(STMT_SET, left,  right);
+		return new ParseTree(STMT_SET, left, right);
+	} else if (t.getTok() == DONE) {
+		return 0;
 	}
-
-	error("Invalid statement, received " + t.getLexeme() + ".");
+    
+	error("Syntax error: invalid statement.");
 	return 0;
 }
 
-/* <Expr> := <Term> {+ <Term>} */
+/* <Expr> := <Term> {+ <Expr>} */
 ParseTree *Expr(std::istream *in) {
 	ParseTree *left = Term(in);
 
 	if (left == 0) {
-		// ERROR
+		error("Syntax error, invalid expression");
 		return 0;
 	}
 
@@ -182,7 +177,7 @@ ParseTree *Expr(std::istream *in) {
 		ParseTree *right = Expr(in);
 
 		if (right == 0) {
-			// ERROR
+			error("Syntax error, invalid expression");
 			return 0;
 		}
 
@@ -193,12 +188,12 @@ ParseTree *Expr(std::istream *in) {
 	return left;
 }
 
-/* <Term> := <Primary> {* <Primary>} */
+/* <Term> := <Primary> {* <Term>} */
 ParseTree *Term(std::istream *in) {
 	ParseTree *left = Primary(in);
 
 	if (left == 0) {
-		// ERROR
+		error("Syntax error, invalid term");
 		return 0;
 	}
 
@@ -208,7 +203,7 @@ ParseTree *Term(std::istream *in) {
 		ParseTree *right = Term(in);
 
 		if (right == 0) {
-			// ERROR
+			error("Syntax error, invalid term");
 			return 0;
 		}
 
@@ -221,8 +216,97 @@ ParseTree *Term(std::istream *in) {
 
 /* <Primary> := ID | <String> | INT | LPAREN <Expr> RPAREN */
 ParseTree *Primary(std::istream *in) {
-	// TODO
+	Token t = doGetToken(in);
+
+	if (t.getTok() == ID) {
+		return new ParseTreeToken(TYPE_ID, t);
+	} else if (t.getTok() == INT) {
+		return new ParseTreeToken(TYPE_INT, t);
+	} else if (t.getTok() == STR) {
+		saveToken(t);
+		return String(in);
+	} else if (t.getTok() == LPAREN) {
+		ParseTree *expr = Expr(in);
+
+		if (expr == 0) {
+			error("Syntax error: invalid expression");
+			return 0;
+		}
+
+		t = doGetToken(in);
+
+		if (t.getTok() != RPAREN) {
+			error("Expected a right parentheses, received " + t.getLexeme() + ".");
+			return 0;
+		}
+
+		return expr;
+	}
+
+	error("Syntax error: invalid primary");
 	return 0;
+}
+
+/* <String> := STR | STR LEFTSQ <Expr> RIGHTSQ | STR LEFTSQ <Expr> SC <Expr> RIGHTSQ */
+ParseTree *String(std::istream *in) {
+	Token t = doGetToken(in);
+
+	if (t.getTok() == STR) {
+		Token t1 = doGetToken(in);
+
+		if (t1.getTok() == LEFTSQ) {
+			ParseTree *left = Expr(in);
+
+			t1 = doGetToken(in);
+
+			if (t1.getTok() == RIGHTSQ) {
+				return new ParseTreeToken(TYPE_STR, t, left);
+			} else if (t1.getTok() == SC) {
+				ParseTree *right = Expr(in);
+
+				t1 = doGetToken(in);
+
+				if (t1.getTok() == RIGHTSQ) {
+					return new ParseTreeToken(TYPE_STR, t, left, right);
+				}
+			}
+
+			error("Expected right square bracket, received " + t.getLexeme() + ".");
+			return 0;
+		}
+
+		saveToken(t1);
+		return new ParseTreeToken(TYPE_STR, t);
+	}
+
+	error("Expected string, received " + t.getLexeme() + ".");
+	return 0;
+}
+
+int plusOpCount = 0;
+int starOpCount = 0;
+int bracketOpCount = 0;
+
+void traverseAndCount(ParseTree *t) {
+	if (!t) return;
+
+	if (t->getType() == TYPE_STR && t->left() != 0) {
+		bracketOpCount += 1;
+	} else if (t->getType() == OP_PLUS) {
+		plusOpCount += 1;
+	} else if (t->getType() == OP_STAR) {
+		starOpCount += 1;
+	}
+	
+	traverseAndCount(t->left());
+	traverseAndCount(t->right());
+}
+
+void traverseAndErrorCheck(ParseTree *t) {
+	if (!t) return;
+
+	traverseAndErrorCheck(t->left());
+	traverseAndErrorCheck(t->right());
 }
 
 int main(int argc, char **argv) {
@@ -248,10 +332,14 @@ int main(int argc, char **argv) {
 	ParseTree *prog = Program(in);
 
 	if (prog == 0 || globalErrorCount != 0) {
-		std::cout << "Parse failed, exiting." << std::endl;
 		return 1;
 	}
+	
+	traverseAndCount(prog);
 
-	std::cout << "Success. Congrats!" << std::endl;
+	std::cout << "Count of + operators: " << plusOpCount << std::endl;
+	std::cout << "Count of * operators: " << starOpCount << std::endl;
+	std::cout << "Count of [] operators: " << bracketOpCount << std::endl;
+	
 	return 0;
 }
