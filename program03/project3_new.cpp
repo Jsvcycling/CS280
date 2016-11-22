@@ -3,6 +3,7 @@
 #include <string>
 #include <istream>
 #include <fstream>
+#include <map>
 
 enum NodeType {
 	GENERIC,
@@ -118,7 +119,7 @@ ParseTree *Stmt(std::istream *in) {
 		ParseTree *left = Expr(in);
 
 		if (left == 0) {
-			error("Syntax error: invalid statement");
+			error("Syntax error, invalid statement");
 			return 0;
 		}
 
@@ -142,14 +143,14 @@ ParseTree *Stmt(std::istream *in) {
 		ParseTree *right = Expr(in);
 
 		if (right == 0) {
-			error("Syntax error: invalid statement");
+			error("Syntax error, invalid statement");
 			return 0;
 		}
 
 		t = doGetToken(in);
 
 		if (t.getTok() != SC) {
-			error("Expected semiolon, received " + t.getLexeme() + ".");
+			error("Expected semicolon, received " + t.getLexeme() + ".");
 			return 0;
 		}
 
@@ -158,7 +159,7 @@ ParseTree *Stmt(std::istream *in) {
 		return 0;
 	}
     
-	error("Syntax error: invalid statement.");
+	error("Syntax error, invalid statement");
 	return 0;
 }
 
@@ -229,7 +230,7 @@ ParseTree *Primary(std::istream *in) {
 		ParseTree *expr = Expr(in);
 
 		if (expr == 0) {
-			error("Syntax error: invalid expression");
+			error("Syntax error, invalid expression");
 			return 0;
 		}
 
@@ -243,7 +244,7 @@ ParseTree *Primary(std::istream *in) {
 		return expr;
 	}
 
-	error("Syntax error: invalid primary");
+	error("Syntax error, invalid primary");
 	return 0;
 }
 
@@ -302,8 +303,24 @@ void traverseAndCount(ParseTree *t) {
 	traverseAndCount(t->right());
 }
 
+std::map<std::string, bool> id_names;
+
 void traverseAndErrorCheck(ParseTree *t) {
 	if (!t) return;
+
+	// ID checking
+	if (t->getType() == STMT_SET) {
+		id_names.insert(std::pair<std::string, bool>(static_cast<ParseTreeToken *>(t->left())->getToken().getLexeme(), true));
+	} else if (t->getType() == TYPE_ID) {
+		if (!id_names[static_cast<ParseTreeToken *>(t)->getToken().getLexeme()]) {
+			std::cout << "Symbol " << static_cast<ParseTreeToken *>(t)->getToken().getLexeme() << " used without being set at line " << t->onWhichLine() << std::endl;
+		}
+	}
+
+	// String checking
+	if (t->getType() == TYPE_STR && static_cast<ParseTreeToken *>(t)->getToken().getLexeme().length() <= 2) {
+		std::cout << "Empty string not permitted on line " << t->onWhichLine() << std::endl;
+	}
 
 	traverseAndErrorCheck(t->left());
 	traverseAndErrorCheck(t->right());
@@ -340,6 +357,8 @@ int main(int argc, char **argv) {
 	std::cout << "Count of + operators: " << plusOpCount << std::endl;
 	std::cout << "Count of * operators: " << starOpCount << std::endl;
 	std::cout << "Count of [] operators: " << bracketOpCount << std::endl;
+
+	traverseAndErrorCheck(prog);
 	
 	return 0;
 }
