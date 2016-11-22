@@ -3,153 +3,73 @@
 #include <string>
 #include <istream>
 #include <fstream>
-
-using namespace std;
+#include <map>
 
 enum NodeType {
 	GENERIC,
-	PLUS_OP,
-	STAR_OP,
-	BRACKET_OP,
-	PRINT_STMT,
-	SET_STMT,
-	ID_TYPE,
-	INT_TYPE,
-	STR_TYPE
+
+	OP_PLUS,
+	OP_STAR,
+	OP_BRACKETS,
+
+	STMT_PRINT,
+	STMT_SET,
+
+	TYPE_ID,
+	TYPE_INT,
+	TYPE_STR
 };
 
-// ParseTree object base class
 class ParseTree {
-private:
+protected:
 	ParseTree *leftChild;
 	ParseTree *rightChild;
 
-	int	whichLine;
-
-protected:
-	NodeType type;
+	int whichLine;
+	NodeType nodeType;
 
 public:
-	ParseTree(ParseTree *left = 0, ParseTree *right = 0) : leftChild(left), rightChild(right) {
+	ParseTree(NodeType type, ParseTree *left = 0, ParseTree *right = 0) : nodeType(type), leftChild(left), rightChild(right) {
 		whichLine = linenum;
-		type = GENERIC;
 	}
 
 	ParseTree *left() { return leftChild; }
 	ParseTree *right() { return rightChild; }
 
-	NodeType getType() { return type; }
-
 	int onWhichLine() { return whichLine; }
+	NodeType getType() { return nodeType; }
 };
 
-// PLUS operator
-class PlusOp : public ParseTree {
-private:
-	Token tok;
-	
-public:
-	PlusOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) {
-		type = PLUS_OP;
-	}
-};
-
-// STAR operator
-class StarOp : public ParseTree {
-private:
-	Token tok;
-	
-public:
-	StarOp(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) {
-		type = STAR_OP;
-	}
-};
-
-// BRACKET operator
-class BracketOp : public ParseTree {
-public:
-	BracketOp(ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right) {
-		type == BRACKET_OP;
-	}
-};
-
-// Print statement
-class PrintStmt : public ParseTree {
-public:
-	PrintStmt(ParseTree *expr) : ParseTree(expr) {
-		type = PRINT_STMT;
-	}
-};
-
-// Set statement
-class SetStmt : public ParseTree {
-public:
-	SetStmt(ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right) {
-		type = SET_STMT;
-	}
-};
-
-// An identifier
-class Id : public ParseTree {
-private:
+class ParseTreeToken : public ParseTree {
+protected:
 	Token tok;
 
 public:
-	Id(const Token &t) : ParseTree(), tok(t) {
-		type = ID_TYPE;
-	}
+	ParseTreeToken(NodeType type, Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(type, left, right), tok(t) { }
 
-	string getId() { return tok.getLexeme(); }
-};
-
-// An integer
-class Integer : public ParseTree {
-private:
-	Token tok;
-
-public:
-	Integer(const Token &t) : ParseTree(), tok(t) {
-		type = INT_TYPE;
-	}
-
-	int getInteger() { return stoi(tok.getLexeme()); }
-};
-
-// A string
-class Str : public ParseTree {
-private:
-	Token tok;
-
-public:
-	Str(const Token &t, ParseTree *left = 0, ParseTree *right = 0) : ParseTree(left, right), tok(t) {
-		type = STR_TYPE;
-	}
-
-	string getString() { return tok.getLexeme(); };
+	Token getToken() { return tok; }
 };
 
 int linenum = 0;
 int globalErrorCount = 0;
 
-/// error handler
-void error(string msg) {
-	cout << linenum << ": " << msg << endl;
-	++globalErrorCount;
+void error(std::string msg) {
+	std::cout << linenum << ": " << msg << std::endl;
+	globalErrorCount += 1;
 }
 
-/// function prototypes
-ParseTree *Program(istream *in);
-ParseTree *StmtList(istream *in);
-ParseTree *Stmt(istream *in);
-ParseTree *Expr(istream *in);
-ParseTree *Term(istream *in);
-ParseTree *Primary(istream *in);
-ParseTree *String(istream *in);
+ParseTree *Program(std::istream *in);
+ParseTree *StmtList(std::istream *in);
+ParseTree *Stmt(std::istream *in);
+ParseTree *Expr(std::istream *in);
+ParseTree *Term(std::istream *in);
+ParseTree *Primary(std::istream *in);
+ParseTree *String(std::istream *in);
 
 Token savedToken;
 bool hasSavedToken = false;
 
-Token doGetToken(istream *in) {
+Token doGetToken(std::istream *in) {
 	if (hasSavedToken) {
 		hasSavedToken = false;
 		return savedToken;
@@ -160,7 +80,7 @@ Token doGetToken(istream *in) {
 
 void saveToken(Token &t) {
 	if (hasSavedToken) {
-		error("a token was already save");
+		error("A token was already saved.");
 		return;
 	}
 
@@ -169,11 +89,10 @@ void saveToken(Token &t) {
 }
 
 /* <Program> := <StmtList> */
-ParseTree *Program(istream *in) {
+ParseTree *Program(std::istream *in) {
 	ParseTree *result = StmtList(in);
 
-	// make sure there are no more tokens...
-	if (getToken(in).getTok() != DONE) {
+	if (doGetToken(in).getTok() != DONE) {
 		return 0;
 	}
 
@@ -181,66 +100,77 @@ ParseTree *Program(istream *in) {
 }
 
 /* <StmtList> := <Stmt> {<Stmt>} */
-ParseTree *StmtList(istream *in) {
+ParseTree *StmtList(std::istream *in) {
 	ParseTree *left = Stmt(in);
-	ParseTree *right = StmtList(in);
 
-	return new ParseTree(left, right);
+	if (left == 0) {
+		return 0;
+	}
+	
+	ParseTree *right = StmtList(in);
+	return new ParseTree(GENERIC, left, right);
 }
 
 /* <Stmt> := PRINT <Expr> SC | SET ID <Expr> SC */
-ParseTree *Stmt(istream *in) {
-	Token t;
-
-	t = doGetToken(in);
+ParseTree *Stmt(std::istream *in) {
+	Token t = doGetToken(in);
 
 	if (t.getTok() == PRINT) {
 		ParseTree *left = Expr(in);
 
 		if (left == 0) {
+			error("Syntax error, invalid statement");
 			return 0;
 		}
 
-		t = doGetToken(in);
+		Token t = doGetToken(in);
 
 		if (t.getTok() != SC) {
-			error("expected semicolon");
+			error("Expected semicolon, received " + t.getLexeme() + ".");
 			return 0;
 		}
 
-		return new PrintStmt(left);
+		return new ParseTree(STMT_PRINT, left);
 	} else if (t.getTok() == SET) {
 		t = doGetToken(in);
 
 		if (t.getTok() != ID) {
-			error("expected id");
+			error("Expected id, received " + t.getLexeme() + ".");
 			return 0;
 		}
 
-		ParseTree *left = new Id(t);
+		ParseTree *left = new ParseTreeToken(TYPE_ID, t);
 		ParseTree *right = Expr(in);
 
-		if (left == 0 || right == 0) {
+		if (right == 0) {
+			error("Syntax error, invalid statement");
 			return 0;
 		}
 
 		t = doGetToken(in);
 
 		if (t.getTok() != SC) {
-			error("expected semicolon");
+			error("Expected semicolon, received " + t.getLexeme() + ".");
 			return 0;
 		}
 
-		return new SetStmt(left, right);
+		return new ParseTree(STMT_SET, left, right);
+	} else if (t.getTok() == DONE) {
+		return 0;
 	}
-	
-	error("Invalid statement");
+    
+	error("Syntax error, invalid statement");
 	return 0;
 }
 
-/* <Expr> := <Term> {+ <Term>} */
-ParseTree *Expr(istream *in) {
+/* <Expr> := <Term> {+ <Expr>} */
+ParseTree *Expr(std::istream *in) {
 	ParseTree *left = Term(in);
+
+	if (left == 0) {
+		error("Syntax error, invalid expression");
+		return 0;
+	}
 
 	Token t = doGetToken(in);
 
@@ -248,19 +178,25 @@ ParseTree *Expr(istream *in) {
 		ParseTree *right = Expr(in);
 
 		if (right == 0) {
+			error("Syntax error, invalid expression");
 			return 0;
 		}
 
-		return new PlusOp(t, left, right);
+		return new ParseTree(OP_PLUS, left, right);
 	}
 
 	saveToken(t);
 	return left;
 }
 
-/* <Term> := <Primary> {* <Primary>} */
-ParseTree *Term(istream *in) {
+/* <Term> := <Primary> {* <Term>} */
+ParseTree *Term(std::istream *in) {
 	ParseTree *left = Primary(in);
+
+	if (left == 0) {
+		error("Syntax error, invalid term");
+		return 0;
+	}
 
 	Token t = doGetToken(in);
 
@@ -268,10 +204,11 @@ ParseTree *Term(istream *in) {
 		ParseTree *right = Term(in);
 
 		if (right == 0) {
+			error("Syntax error, invalid term");
 			return 0;
 		}
 
-		return new StarOp(t, left, right);
+		return new ParseTree(OP_STAR, left, right);
 	}
 
 	saveToken(t);
@@ -279,77 +216,71 @@ ParseTree *Term(istream *in) {
 }
 
 /* <Primary> := ID | <String> | INT | LPAREN <Expr> RPAREN */
-ParseTree *Primary(istream *in) {
+ParseTree *Primary(std::istream *in) {
 	Token t = doGetToken(in);
 
 	if (t.getTok() == ID) {
-		return new Id(t);
+		return new ParseTreeToken(TYPE_ID, t);
 	} else if (t.getTok() == INT) {
-		return new Integer(t);
+		return new ParseTreeToken(TYPE_INT, t);
 	} else if (t.getTok() == STR) {
 		saveToken(t);
 		return String(in);
 	} else if (t.getTok() == LPAREN) {
+		ParseTree *expr = Expr(in);
+
+		if (expr == 0) {
+			error("Syntax error, invalid expression");
+			return 0;
+		}
+
 		t = doGetToken(in);
 
-		if (t.getTok() != ID) {
-			error("expected id");
-			return 0;
-		}
-		
-		ParseTree *left = Expr(in);
-		
-		if (left == 0) {
-			return 0;
-		}
-		
-		t = doGetToken(in);
-		
 		if (t.getTok() != RPAREN) {
-			error("expected right parens");
+			error("Expected a right parentheses, received " + t.getLexeme() + ".");
 			return 0;
 		}
 
-		return left;
+		return expr;
 	}
 
+	error("Syntax error, invalid primary");
 	return 0;
 }
 
 /* <String> := STR | STR LEFTSQ <Expr> RIGHTSQ | STR LEFTSQ <Expr> SC <Expr> RIGHTSQ */
-ParseTree *String(istream *in) {
+ParseTree *String(std::istream *in) {
 	Token t = doGetToken(in);
 
 	if (t.getTok() == STR) {
-		Token t1 = getToken(in);
+		Token t1 = doGetToken(in);
 
 		if (t1.getTok() == LEFTSQ) {
 			ParseTree *left = Expr(in);
 
-			t1 = getToken(in);
+			t1 = doGetToken(in);
 
 			if (t1.getTok() == RIGHTSQ) {
-				BracketOp *brackets = new BracketOp(left);
-				return new Str(t, brackets);
+				return new ParseTreeToken(TYPE_STR, t, left);
 			} else if (t1.getTok() == SC) {
 				ParseTree *right = Expr(in);
 
-				t1 = getToken(in);
+				t1 = doGetToken(in);
 
 				if (t1.getTok() == RIGHTSQ) {
-					BracketOp *brackets = new BracketOp(left, right);
-					return new Str(t, brackets);
+					return new ParseTreeToken(TYPE_STR, t, left, right);
 				}
 			}
 
-			error("expected right square bracket");
+			error("Expected right square bracket, received " + t.getLexeme() + ".");
 			return 0;
 		}
 
-		return new Str(t);
+		saveToken(t1);
+		return new ParseTreeToken(TYPE_STR, t);
 	}
-	
-	error("expected string");
+
+	error("Expected string, received " + t.getLexeme() + ".");
 	return 0;
 }
 
@@ -357,63 +288,77 @@ int plusOpCount = 0;
 int starOpCount = 0;
 int bracketOpCount = 0;
 
-// For accumulating operator counts
-void traverseTree1(ParseTree *t) {
+void traverseAndCount(ParseTree *t) {
 	if (!t) return;
-	traverseTree1(t->left());
-	traverseTree1(t->right());
 
-	if (t->getType() == PLUS_OP) {
-		plusOpCount += 1;
-	} else if (t->getType() == STAR_OP) {
-		starOpCount += 1;
-	} else if (t->getType() == BRACKET_OP) {
+	if (t->getType() == TYPE_STR && t->left() != 0) {
 		bracketOpCount += 1;
+	} else if (t->getType() == OP_PLUS) {
+		plusOpCount += 1;
+	} else if (t->getType() == OP_STAR) {
+		starOpCount += 1;
 	}
+	
+	traverseAndCount(t->left());
+	traverseAndCount(t->right());
 }
 
-// For error checking
-void traverseTree2(ParseTree *t) {
-	if (!t) return;
-	traverseTree2(t->left());
-	traverseTree2(t->right());
+std::map<std::string, bool> id_names;
 
-	// TODO: check for errors
+void traverseAndErrorCheck(ParseTree *t) {
+	if (!t) return;
+
+	// ID checking
+	if (t->getType() == STMT_SET) {
+		id_names.insert(std::pair<std::string, bool>(static_cast<ParseTreeToken *>(t->left())->getToken().getLexeme(), true));
+	} else if (t->getType() == TYPE_ID) {
+		if (!id_names[static_cast<ParseTreeToken *>(t)->getToken().getLexeme()]) {
+			std::cout << "Symbol " << static_cast<ParseTreeToken *>(t)->getToken().getLexeme() << " used without being set at line " << t->onWhichLine() << std::endl;
+		}
+	}
+
+	// String checking
+	if (t->getType() == TYPE_STR && static_cast<ParseTreeToken *>(t)->getToken().getLexeme().length() <= 2) {
+		std::cout << "Empty string not permitted on line " << t->onWhichLine() << std::endl;
+	}
+
+	traverseAndErrorCheck(t->left());
+	traverseAndErrorCheck(t->right());
 }
 
 int main(int argc, char **argv) {
-	istream *in = &cin;
-	fstream infile;
+	std::istream *in = &std::cin;
+	std::fstream infile;
 
 	for (int i = 1; i < argc; i++) {
-		if (in != &cin) {
-			// TODO
+		if (in != &std::cin) {
+			std::cout << "Too many arguments, exiting." << std::endl;
+			return 1;
 		}
 
 		infile.open(argv[i]);
 
 		if (!infile.is_open()) {
-			// TODO
+			std::cout << "Could not open file, exiting." << std::endl;
+			return 1;
 		}
 
 		in = &infile;
 	}
-	
+
 	ParseTree *prog = Program(in);
 
 	if (prog == 0 || globalErrorCount != 0) {
-		cout << "Parse failed, exiting" << endl;
-		return 0;
+		return 1;
 	}
-
-	traverseTree1(prog);
-
-	cout << "Count of + operators: " << plusOpCount << endl;
-	cout << "Count of * operators: " << starOpCount << endl;
-	cout << "Count of [] operators: " << bracketOpCount << endl;
 	
-	traverseTree2(prog);
+	traverseAndCount(prog);
+
+	std::cout << "Count of + operators: " << plusOpCount << std::endl;
+	std::cout << "Count of * operators: " << starOpCount << std::endl;
+	std::cout << "Count of [] operators: " << bracketOpCount << std::endl;
+
+	traverseAndErrorCheck(prog);
 	
-	cout << "Success. Congrats!" << endl;
 	return 0;
 }
