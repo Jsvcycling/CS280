@@ -53,6 +53,10 @@ protected:
 	
 	Value(ValueType type) : type(type) { }
 
+	ValueType getType() const { return this->type; }
+
+	virtual ostream& operator <<(Value val) = 0;
+
 public:
 	Value() : type(ERRORTYPE) { }
 };
@@ -61,16 +65,27 @@ class IntValue : public Value {
 public:
 	int val;
 
-	Value(int val) : Value(INTEGER), val(val) { }
+	Value(int val = 0) : Value(INTEGER), val(val) { }
+
+	ostream& operator <<(IntValue val) {
+		// TODO
+		return 0;
+	}
 };
 
 class StrValue : public Value {
 public:
-	std::string val;
+	string val;
 
-	Value(std::string &val) : Value(STRING), val(val) { }
+	Value(string &val = "") : Value(STRING), val(val) { }
+
+	ostream& operator <<(StrValue val) {
+		// TODO
+		return 0;
+	}
 };
-	
+
+map<string, Value> symbolTable;
 
 /////////
 //// this class can be used to represent the parse result
@@ -105,6 +120,9 @@ public:
 		return cnt + this->checkUseBeforeSet(symbols);
 	}
 
+	ParseTree *getLeftChild() const { return this->leftChild; }
+	ParseTree *getRightChild() const { return this->rightChild; }
+
 	virtual int checkUseBeforeSet( map<string,int>& symbols ) {
 		return 0;
 	}
@@ -120,11 +138,21 @@ public:
 Class Slist : public ParseTree {
 public:
 	Slist(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
+
+	Value eval() {
+		// TODO: how the hell do we handle this?
+	}
 };
 
 class PrintStmt : public ParseTree {
 public:
 	PrintStmt(ParseTree *expr) : ParseTree(expr) {}
+
+	Value eval() {
+		Value val = getLeftChild()->eval();
+		std::cout << val << std::endl;
+		return val;
+	}
 };
 
 class SetStmt : public ParseTree {
@@ -140,7 +168,15 @@ public:
 	}
 
 	Value eval() {
-		// TODO
+		Value val = getLeftChild()->eval();
+
+		if (symbolTable.find(ident) != map::end) {
+			symbolTable.find(ident)->second = val;
+		} else {
+			symbolTable.insert(pair<string, Value>(ident, val));
+		}
+
+		return val;
 	}
 };
 
@@ -150,9 +186,18 @@ public:
 	int isPlus() { return 1; }
 
 	Value eval() {
-		// TODO
+		Value left = getLeftChild()->eval();
+		Value right = getRightChild()->eval();
 
-		return IntValue(0);
+		if (left.getType() == INTEGER && right.getType() == INTEGER) {
+			return IntValue(((IntValue)left).val + ((IntValue)right).val);
+		} else if (left.getType() == STRING && right.getType() == STRING) {
+			// TODO: both are strings, concat them together.
+			return StrValue();
+		} else {
+			// TODO: throw a runtime error.
+			return Value();
+		}
 	}
 };
 
@@ -162,9 +207,15 @@ public:
 	int isStar() { return 1; }
 
 	Value eval() {
-		// TODO
-
-		return IntValue(0);
+		Value left = getLeftChild()->eval();
+		Value right = getRightChild()->eval();
+		
+		if (left.getType() == INTEGER && right.getType() == INTEGER) {
+			return IntValue(((IntValue)left).val * ((IntValue)right).val);
+		} else {
+			// TODO: throw a runtime error.
+			return Value();
+		}
 	}
 };
 
@@ -177,8 +228,7 @@ public:
 	int isBrack() { return 1; }
 
 	Value eval() {
-		// TODO
-
+		// TODO: how the hell do we handle this??
 		return StrValue("");
 	}
 };
@@ -199,7 +249,7 @@ public:
 		return 0;
 	}
 
-	Value eval() { return Value(getString()); }
+	Value eval() { return StrValue(getString()); }
 };
 
 //// for example, an integer...
@@ -212,7 +262,7 @@ public:
 
 	int	getInteger() { return stoi( iTok.getLexeme() ); }
 
-	Value eval() { return Value(getInteger()); }
+	Value eval() { return IntValue(getInteger()); }
 };
 
 class Identifier : public ParseTree {
@@ -228,6 +278,15 @@ public:
 			return 1;
 		}
 		return 0;
+	}
+
+	Value eval() {
+		if (symbolTable.find(iTok.getLexeme()) != map::end) {
+			return symbolTable.find(iTok.getLexeme())->second;
+		} else {
+			// TODO: throw a runtime error.
+			return Value();
+		}
 	}
 };
 
