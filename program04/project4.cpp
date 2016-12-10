@@ -10,82 +10,83 @@ Token saved;
 bool isSaved = false;
 
 Token GetAToken(istream *in) {
-	if( isSaved ) {
-		isSaved = false;
-		return saved;
-	}
+    if( isSaved ) {
+        isSaved = false;
+        return saved;
+    }
 
-	return getToken(in);
+    return getToken(in);
 }
 
 void PushbackToken(Token& t) {
-	if( isSaved ) {
-		cerr << "Can't push back more than one token!!!";
-		exit(0);
-	}
+    if( isSaved ) {
+        cerr << "Can't push back more than one token!!!";
+        exit(0);
+    }
 
-	saved = t;
-	isSaved = true;
+    saved = t;
+    isSaved = true;
 }
 
 int linenum = 0;
 int globalErrorCount = 0;
 
 /// error handler
-void error(string msg, bool showline=true)
-{
-	if( showline )
-		cout << linenum << ": ";
-	cout << msg << endl;
-	++globalErrorCount;
+void error(string msg, bool showline=true) {
+    if( showline )
+        cout << linenum << ": ";
+    cout << msg << endl;
+    ++globalErrorCount;
 }
 
 enum ValueType {
-	INTEGER,
-	STRING,
+    INTEGER,
+    STRING,
 
-	ERRORTYPE
+    ERRORTYPE
 };
 
 class Value {
 protected:
-	ValueType type;
-	
-	Value(ValueType type) : type(type) { }
+    ValueType type;
 
-	ValueType getType() const { return this->type; }
-
-	virtual ostream& operator <<(Value val) = 0;
+    Value(ValueType type) : type(type) { }
 
 public:
-	Value() : type(ERRORTYPE) { }
+    Value() : type(ERRORTYPE) { }
+
+    ValueType getType() const {
+        return this->type;
+    }
+
+    virtual ostream& operator <<(ostream &strm);
 };
 
 class IntValue : public Value {
 public:
-	int val;
+    int val;
 
-	Value(int val = 0) : Value(INTEGER), val(val) { }
+    IntValue(int val = 0) : Value(INTEGER), val(val) { }
 
-	ostream& operator <<(IntValue val) {
-		// TODO
-		return 0;
-	}
+    ostream& operator <<(ostream &strm) {
+        // TODO
+        return strm;
+    }
 };
 
 class StrValue : public Value {
 public:
-	string val;
+    string val;
 
-	Value(string &val = "") : Value(STRING), val(val) { }
+    StrValue(string val = "") : Value(STRING), val(val) { }
 
-	ostream& operator <<(StrValue val) {
-		// TODO
-		return 0;
-	}
+    ostream &operator <<(ostream &strm) {
+        // TODO
+        return strm;
+    }
 };
 
-map<string, Value> symbolTable;
+map<string, Value *> symbolTable;
 
 /////////
 //// this class can be used to represent the parse result
@@ -94,200 +95,230 @@ map<string, Value> symbolTable;
 
 class ParseTree {
 private:
-	ParseTree *leftChild;
-	ParseTree *rightChild;
+    ParseTree *leftChild;
+    ParseTree *rightChild;
 
-	int	whichLine;
+    int	whichLine;
 
 public:
-	ParseTree(ParseTree *left = 0, ParseTree *right = 0) : leftChild(left),rightChild(right) {
-		whichLine = linenum;
-	}
+    ParseTree(ParseTree *left = 0, ParseTree *right = 0) : leftChild(left),rightChild(right) {
+        whichLine = linenum;
+    }
 
-	int onWhichLine() { return whichLine; }
+    int onWhichLine() {
+        return whichLine;
+    }
 
-	int traverseAndCount(int (ParseTree::*f)()) {
-		int cnt = 0;
-		if( leftChild ) cnt += leftChild->traverseAndCount(f);
-		if( rightChild ) cnt += rightChild->traverseAndCount(f);
-		return cnt + (this->*f)();
-	}
+    int traverseAndCount(int (ParseTree::*f)()) {
+        int cnt = 0;
+        if( leftChild ) cnt += leftChild->traverseAndCount(f);
+        if( rightChild ) cnt += rightChild->traverseAndCount(f);
+        return cnt + (this->*f)();
+    }
 
-	int countUseBeforeSet( map<string,int>& symbols ) {
-		int cnt = 0;
-		if( leftChild ) cnt += leftChild->countUseBeforeSet(symbols);
-		if( rightChild ) cnt += rightChild->countUseBeforeSet(symbols);
-		return cnt + this->checkUseBeforeSet(symbols);
-	}
+    int countUseBeforeSet( map<string,int>& symbols ) {
+        int cnt = 0;
+        if( leftChild ) cnt += leftChild->countUseBeforeSet(symbols);
+        if( rightChild ) cnt += rightChild->countUseBeforeSet(symbols);
+        return cnt + this->checkUseBeforeSet(symbols);
+    }
 
-	ParseTree *getLeftChild() const { return this->leftChild; }
-	ParseTree *getRightChild() const { return this->rightChild; }
+    ParseTree *getLeftChild() const {
+        return this->leftChild;
+    }
+    ParseTree *getRightChild() const {
+        return this->rightChild;
+    }
 
-	virtual int checkUseBeforeSet( map<string,int>& symbols ) {
-		return 0;
-	}
+    virtual int checkUseBeforeSet( map<string,int>& symbols ) {
+        return 0;
+    }
 
-	virtual int isPlus() { return 0; }
-	virtual int isStar() { return 0; }
-	virtual int isBrack() { return 0; }
-	virtual int isEmptyString() { return 0; }
+    virtual int isPlus() {
+        return 0;
+    }
+    virtual int isStar() {
+        return 0;
+    }
+    virtual int isBrack() {
+        return 0;
+    }
+    virtual int isEmptyString() {
+        return 0;
+    }
 
-	virtual Value eval() { return Value(); }
+    virtual Value *eval();
 };
 
-Class Slist : public ParseTree {
+class Slist : public ParseTree {
 public:
-	Slist(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
+    Slist(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
 
-	Value eval() {
-		// TODO: how the hell do we handle this?
-	}
+    Value *eval() {
+        // TODO: how the hell do we handle this?
+
+        return 0;
+    }
 };
 
 class PrintStmt : public ParseTree {
 public:
-	PrintStmt(ParseTree *expr) : ParseTree(expr) {}
+    PrintStmt(ParseTree *expr) : ParseTree(expr) {}
 
-	Value eval() {
-		Value val = getLeftChild()->eval();
-		std::cout << val << std::endl;
-		return val;
-	}
+    Value *eval() {
+        Value *val = getLeftChild()->eval();
+        std::cout << val << std::endl;
+        return val;
+    }
 };
 
 class SetStmt : public ParseTree {
 private:
-	string	ident;
+    string	ident;
 
 public:
-	SetStmt(string id, ParseTree *expr) : ParseTree(expr), ident(id) {}
+    SetStmt(string id, ParseTree *expr) : ParseTree(expr), ident(id) {}
 
-	int checkUseBeforeSet( map<string,int>& symbols ) {
-		symbols[ident]++;
-		return 0;
-	}
+    int checkUseBeforeSet( map<string,int>& symbols ) {
+        symbols[ident]++;
+        return 0;
+    }
 
-	Value eval() {
-		Value val = getLeftChild()->eval();
+    Value *eval() {
+        Value *val = getLeftChild()->eval();
 
-		if (symbolTable.find(ident) != map::end) {
-			symbolTable.find(ident)->second = val;
-		} else {
-			symbolTable.insert(pair<string, Value>(ident, val));
-		}
+        if (symbolTable.find(ident) != symbolTable.end()) {
+            symbolTable.find(ident)->second = val;
+        } else {
+            symbolTable.insert(pair<string, Value *>(ident, val));
+        }
 
-		return val;
-	}
+        return val;
+    }
 };
 
 class PlusOp : public ParseTree {
 public:
-	PlusOp(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
-	int isPlus() { return 1; }
+    PlusOp(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
+    int isPlus() {
+        return 1;
+    }
 
-	Value eval() {
-		Value left = getLeftChild()->eval();
-		Value right = getRightChild()->eval();
+    Value *eval() {
+        Value *left = getLeftChild()->eval();
+        Value *right = getRightChild()->eval();
 
-		if (left.getType() == INTEGER && right.getType() == INTEGER) {
-			return IntValue(((IntValue)left).val + ((IntValue)right).val);
-		} else if (left.getType() == STRING && right.getType() == STRING) {
-			// TODO: both are strings, concat them together.
-			return StrValue();
-		} else {
-			// TODO: throw a runtime error.
-			return Value();
-		}
-	}
+        if (left->getType() == INTEGER && right->getType() == INTEGER) {
+            return new IntValue(dynamic_cast<IntValue *>(left)->val + dynamic_cast<IntValue *>(right)->val);
+        } else if (left->getType() == STRING && right->getType() == STRING) {
+            // TODO: both are strings, concat them together.
+            return new StrValue();
+        } else {
+            // TODO: throw a runtime error.
+            return 0;
+        }
+    }
 };
 
 class StarOp : public ParseTree {
 public:
-	StarOp(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
-	int isStar() { return 1; }
+    StarOp(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
+    int isStar() {
+        return 1;
+    }
 
-	Value eval() {
-		Value left = getLeftChild()->eval();
-		Value right = getRightChild()->eval();
-		
-		if (left.getType() == INTEGER && right.getType() == INTEGER) {
-			return IntValue(((IntValue)left).val * ((IntValue)right).val);
-		} else {
-			// TODO: throw a runtime error.
-			return Value();
-		}
-	}
+    Value *eval() {
+        Value *left = getLeftChild()->eval();
+        Value *right = getRightChild()->eval();
+
+        if (left->getType() == INTEGER && right->getType() == INTEGER) {
+            return new IntValue(dynamic_cast<IntValue *>(left)->val * dynamic_cast<IntValue *>(right)->val);
+        } else {
+            // TODO: throw a runtime error.
+            return 0;
+        }
+    }
 };
 
 class BracketOp : public ParseTree {
 private:
-	Token sTok;
+    Token sTok;
 
 public:
-	BracketOp(const Token& sTok, ParseTree *left, ParseTree *right = 0) : ParseTree(left,right), sTok(sTok) {}
-	int isBrack() { return 1; }
+    BracketOp(const Token& sTok, ParseTree *left, ParseTree *right = 0) : ParseTree(left,right), sTok(sTok) {}
+    int isBrack() {
+        return 1;
+    }
 
-	Value eval() {
-		// TODO: how the hell do we handle this??
-		return StrValue("");
-	}
+    Value *eval() {
+        // TODO: how the hell do we handle this??
+        return new StrValue("");
+    }
 };
 
 class StringConst : public ParseTree {
 private:
-	Token sTok;
+    Token sTok;
 
 public:
-	StringConst(const Token& sTok) : ParseTree(), sTok(sTok) {}
+    StringConst(const Token& sTok) : ParseTree(), sTok(sTok) {}
 
-	string	getString() { return sTok.getLexeme(); }
-	int isEmptyString() {
-		if( sTok.getLexeme().length() == 2 ) {
-			error("Empty string not permitted on line " + to_string(onWhichLine()), false );
-			return 1;
-		}
-		return 0;
-	}
+    string	getString() {
+        return sTok.getLexeme();
+    }
+    int isEmptyString() {
+        if( sTok.getLexeme().length() == 2 ) {
+            error("Empty string not permitted on line " + to_string(onWhichLine()), false );
+            return 1;
+        }
+        return 0;
+    }
 
-	Value eval() { return StrValue(getString()); }
+    Value *eval() {
+        return new StrValue(getString());
+    }
 };
 
 //// for example, an integer...
 class Integer : public ParseTree {
 private:
-	Token	iTok;
+    Token	iTok;
 
 public:
-	Integer(const Token& iTok) : ParseTree(), iTok(iTok) {}
+    Integer(const Token& iTok) : ParseTree(), iTok(iTok) {}
 
-	int	getInteger() { return stoi( iTok.getLexeme() ); }
+    int	getInteger() {
+        return stoi( iTok.getLexeme() );
+    }
 
-	Value eval() { return IntValue(getInteger()); }
+    Value *eval() {
+        return new IntValue(getInteger());
+    }
 };
 
 class Identifier : public ParseTree {
 private:
-	Token	iTok;
+    Token	iTok;
 
 public:
-	Identifier(const Token& iTok) : ParseTree(), iTok(iTok) {}
+    Identifier(const Token& iTok) : ParseTree(), iTok(iTok) {}
 
-	int checkUseBeforeSet( map<string,int>& symbols ) {
-		if( symbols.find( iTok.getLexeme() ) == symbols.end() ) {
-			error("Symbol " + iTok.getLexeme() + " used without being set at line " + to_string(onWhichLine()), false);
-			return 1;
-		}
-		return 0;
-	}
+    int checkUseBeforeSet( map<string,int>& symbols ) {
+        if( symbols.find( iTok.getLexeme() ) == symbols.end() ) {
+            error("Symbol " + iTok.getLexeme() + " used without being set at line " + to_string(onWhichLine()), false);
+            return 1;
+        }
+        return 0;
+    }
 
-	Value eval() {
-		if (symbolTable.find(iTok.getLexeme()) != map::end) {
-			return symbolTable.find(iTok.getLexeme())->second;
-		} else {
-			// TODO: throw a runtime error.
-			return Value();
-		}
-	}
+    Value *eval() {
+        if (symbolTable.find(iTok.getLexeme()) != symbolTable.end()) {
+            return symbolTable.find(iTok.getLexeme())->second;
+        } else {
+            // TODO: throw a runtime error.
+            return 0;
+        }
+    }
 };
 
 /// function prototypes
@@ -300,255 +331,241 @@ ParseTree *Primary(istream *in);
 ParseTree *String(istream *in);
 
 
-ParseTree *Program(istream *in)
-{
-	ParseTree *result = StmtList(in);
+ParseTree *Program(istream *in) {
+    ParseTree *result = StmtList(in);
 
-	// make sure there are no more tokens...
-	if( GetAToken(in).getTok() != DONE )
-		return 0;
+    // make sure there are no more tokens...
+    if( GetAToken(in).getTok() != DONE )
+        return 0;
 
-	return result;
+    return result;
 }
 
 
-ParseTree *StmtList(istream *in)
-{
-	ParseTree *stmt = Stmt(in);
+ParseTree *StmtList(istream *in) {
+    ParseTree *stmt = Stmt(in);
 
-	if( stmt == 0 )
-		return 0;
-	
-	return new Slist(stmt, StmtList(in));
+    if( stmt == 0 )
+        return 0;
+
+    return new Slist(stmt, StmtList(in));
 }
 
 
-ParseTree *Stmt(istream *in)
-{
-	Token t;
+ParseTree *Stmt(istream *in) {
+    Token t;
 
-	t = GetAToken(in);
+    t = GetAToken(in);
 
-	if( t.getTok() == ERR ) {
-		error("Invalid token");
-		return 0;
-	}
+    if( t.getTok() == ERR ) {
+        error("Invalid token");
+        return 0;
+    }
 
-	if( t.getTok() == DONE )
-		return 0;
+    if( t.getTok() == DONE )
+        return 0;
 
-	if( t.getTok() == PRINT ) {
-		// process PRINT
-		ParseTree *ex = Expr(in);
+    if( t.getTok() == PRINT ) {
+        // process PRINT
+        ParseTree *ex = Expr(in);
 
-		if( ex == 0 ) {
-			error("Expecting expression after print");
-			return 0;
-		}
+        if( ex == 0 ) {
+            error("Expecting expression after print");
+            return 0;
+        }
 
-		if( GetAToken(in).getTok() != SC ) {
-			error("Missing semicolon");
-			return 0;
-		}
+        if( GetAToken(in).getTok() != SC ) {
+            error("Missing semicolon");
+            return 0;
+        }
 
-		return new PrintStmt(ex);
-	}
-	else if( t.getTok() == SET ) {
-		// process SET
-		Token tid = GetAToken(in);
+        return new PrintStmt(ex);
+    } else if( t.getTok() == SET ) {
+        // process SET
+        Token tid = GetAToken(in);
 
-		if( tid.getTok() != ID ) {
-			error("Expecting identifier after set");
-			return 0;
-		}
+        if( tid.getTok() != ID ) {
+            error("Expecting identifier after set");
+            return 0;
+        }
 
-		ParseTree *ex = Expr(in);
+        ParseTree *ex = Expr(in);
 
-		if( ex == 0 ) {
-			error("Expecting expression after identifier");
-			return 0;
-		}
+        if( ex == 0 ) {
+            error("Expecting expression after identifier");
+            return 0;
+        }
 
-		if( GetAToken(in).getTok() != SC ) {
-			error("Missing semicolon");
-			return 0;
-		}
+        if( GetAToken(in).getTok() != SC ) {
+            error("Missing semicolon");
+            return 0;
+        }
 
-		return new SetStmt(tid.getLexeme(), ex);
-	}
-	else {
-		error("Syntax error, invalid statement");
-	}
+        return new SetStmt(tid.getLexeme(), ex);
+    } else {
+        error("Syntax error, invalid statement");
+    }
 
-	return 0;
+    return 0;
 }
 
 
-ParseTree *Expr(istream *in)
-{
-	ParseTree *exp = Term( in );
+ParseTree *Expr(istream *in) {
+    ParseTree *exp = Term( in );
 
-	if( exp == 0 ) return 0;
+    if( exp == 0 ) return 0;
 
-	while( true ) {
+    while( true ) {
 
-		Token t = GetAToken(in);
+        Token t = GetAToken(in);
 
-		if( t.getTok() != PLUS ) {
-			PushbackToken(t);
-			break;
-		}
+        if( t.getTok() != PLUS ) {
+            PushbackToken(t);
+            break;
+        }
 
-		ParseTree *exp2 = Term( in );
-		if( exp2 == 0 ) {
-			error("missing operand after +");
-			return 0;
-		}
+        ParseTree *exp2 = Term( in );
+        if( exp2 == 0 ) {
+            error("missing operand after +");
+            return 0;
+        }
 
-		exp = new PlusOp(exp, exp2);
-	}
+        exp = new PlusOp(exp, exp2);
+    }
 
-	return exp;
+    return exp;
 }
 
 
-ParseTree *Term(istream *in)
-{
-	ParseTree *pri = Primary( in );
+ParseTree *Term(istream *in) {
+    ParseTree *pri = Primary( in );
 
-	if( pri == 0 ) return 0;
+    if( pri == 0 ) return 0;
 
-	while( true ) {
+    while( true ) {
 
-		Token t = GetAToken(in);
+        Token t = GetAToken(in);
 
-		if( t.getTok() != STAR ) {
-			PushbackToken(t);
-			break;
-		}
+        if( t.getTok() != STAR ) {
+            PushbackToken(t);
+            break;
+        }
 
-		ParseTree *pri2 = Primary( in );
-		if( pri2 == 0 ) {
-			error("missing operand after *");
-			return 0;
-		}
+        ParseTree *pri2 = Primary( in );
+        if( pri2 == 0 ) {
+            error("missing operand after *");
+            return 0;
+        }
 
-		pri = new StarOp(pri, pri2);
-	}
+        pri = new StarOp(pri, pri2);
+    }
 
-	return pri;
+    return pri;
 }
 
 
-ParseTree *Primary(istream *in)
-{
-	Token t = GetAToken(in);
+ParseTree *Primary(istream *in) {
+    Token t = GetAToken(in);
 
-	if( t.getTok() == ID ) {
-		return new Identifier(t);
-	}
-	else if( t.getTok() == INT ) {
-		return new Integer(t);
-	}
-	else if( t.getTok() == STR ) {
-		PushbackToken(t);
-		return String(in);
-	}
-	else if( t.getTok() == LPAREN ) {
-		ParseTree *ex = Expr(in);
-		if( ex == 0 )
-			return 0;
-		t = GetAToken(in);
-		if( t.getTok() != RPAREN ) {
-			error("expected right parens");
-			return 0;
-		}
+    if( t.getTok() == ID ) {
+        return new Identifier(t);
+    } else if( t.getTok() == INT ) {
+        return new Integer(t);
+    } else if( t.getTok() == STR ) {
+        PushbackToken(t);
+        return String(in);
+    } else if( t.getTok() == LPAREN ) {
+        ParseTree *ex = Expr(in);
+        if( ex == 0 )
+            return 0;
+        t = GetAToken(in);
+        if( t.getTok() != RPAREN ) {
+            error("expected right parens");
+            return 0;
+        }
 
-		return ex;
-	}
+        return ex;
+    }
 
-	return 0;
+    return 0;
 }
 
 
-ParseTree *String(istream *in)
-{
-	Token t = GetAToken(in); // I know it's a string!
-	ParseTree *lexpr, *rexpr;
+ParseTree *String(istream *in) {
+    Token t = GetAToken(in); // I know it's a string!
+    ParseTree *lexpr, *rexpr;
 
-	Token lb = GetAToken(in);
-	if( lb.getTok() != LEFTSQ ) {
-		PushbackToken(lb);
-		return new StringConst(t);
-	}
+    Token lb = GetAToken(in);
+    if( lb.getTok() != LEFTSQ ) {
+        PushbackToken(lb);
+        return new StringConst(t);
+    }
 
-	lexpr = Expr(in);
-	if( lexpr == 0 ) {
-		error("missing expression after [");
-		return 0;
-	}
+    lexpr = Expr(in);
+    if( lexpr == 0 ) {
+        error("missing expression after [");
+        return 0;
+    }
 
-	lb = GetAToken(in);
-	if( lb.getTok() == RIGHTSQ ) {
-		return new BracketOp(t, lexpr);
-	}
-	else if( lb.getTok() != SC ) {
-		error("expected ; after first expression in []");
-		return 0;
-	}
+    lb = GetAToken(in);
+    if( lb.getTok() == RIGHTSQ ) {
+        return new BracketOp(t, lexpr);
+    } else if( lb.getTok() != SC ) {
+        error("expected ; after first expression in []");
+        return 0;
+    }
 
-	rexpr = Expr(in);
-	if( rexpr == 0 ) {
-		error("missing expression after ;");
-		return 0;
-	}
+    rexpr = Expr(in);
+    if( rexpr == 0 ) {
+        error("missing expression after ;");
+        return 0;
+    }
 
-	lb = GetAToken(in);
-	if( lb.getTok() == RIGHTSQ ) {
-		return new BracketOp(t, lexpr, rexpr);
-	}
+    lb = GetAToken(in);
+    if( lb.getTok() == RIGHTSQ ) {
+        return new BracketOp(t, lexpr, rexpr);
+    }
 
-	error("expected ]");
-	return 0;
+    error("expected ]");
+    return 0;
 }
 
 
 int
-main(int argc, char *argv[])
-{
-	istream *in = &cin;
-	ifstream infile;
+main(int argc, char *argv[]) {
+    istream *in = &cin;
+    ifstream infile;
 
-	for( int i = 1; i < argc; i++ ) {
-		if( in != &cin ) {
-			cerr << "Cannot specify more than one file" << endl;
-			return 1;
-		}
+    for( int i = 1; i < argc; i++ ) {
+        if( in != &cin ) {
+            cerr << "Cannot specify more than one file" << endl;
+            return 1;
+        }
 
-		infile.open(argv[i]);
-		if( infile.is_open() == false ) {
-			cerr << "Cannot open file " << argv[i] << endl;
-			return 1;
-		}
+        infile.open(argv[i]);
+        if( infile.is_open() == false ) {
+            cerr << "Cannot open file " << argv[i] << endl;
+            return 1;
+        }
 
-		in = &infile;
-	}
+        in = &infile;
+    }
 
-	ParseTree *prog = Program(in);
+    ParseTree *prog = Program(in);
 
-	if( prog == 0 || globalErrorCount != 0 ) {
-		return 0;
-	}
+    if( prog == 0 || globalErrorCount != 0 ) {
+        return 0;
+    }
 
-	// on successful parse, count +, star and []
+    // on successful parse, count +, star and []
 
-	cout << "Count of + operators: " << prog->traverseAndCount( &ParseTree::isPlus ) << endl;
-	cout << "Count of * operators: " << prog->traverseAndCount( &ParseTree::isStar ) << endl;
-	cout << "Count of [] operators: " << prog->traverseAndCount( &ParseTree::isBrack ) << endl;
+    cout << "Count of + operators: " << prog->traverseAndCount( &ParseTree::isPlus ) << endl;
+    cout << "Count of * operators: " << prog->traverseAndCount( &ParseTree::isStar ) << endl;
+    cout << "Count of [] operators: " << prog->traverseAndCount( &ParseTree::isBrack ) << endl;
 
-	prog->traverseAndCount( &ParseTree::isEmptyString );
+    prog->traverseAndCount( &ParseTree::isEmptyString );
 
-	map<string,int> symbols;
-	int useBeforeSetCount = prog->countUseBeforeSet( symbols );
-	return 0;
+    map<string,int> symbols;
+    int useBeforeSetCount = prog->countUseBeforeSet( symbols );
+    return 0;
 }
