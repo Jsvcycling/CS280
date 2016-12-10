@@ -46,44 +46,20 @@ enum ValueType {
     ERRORTYPE
 };
 
+template <typename T>
 class Value {
-protected:
+public:
     ValueType type;
+	T val;
 
-    Value(ValueType type) : type(type) { }
+    Value(ValueType typeT) : TYPE(TYPE) { }
+    VALUE() : TYPE(ERRORTYPE) { }
 
-public:
-    Value() : type(ERRORTYPE) { }
-
-    ValueType getType() const {
-        return this->type;
+    VALUETYPE GETTYPE() CONST {
+        RETURN THIS->TYPE;
     }
 
-    virtual ostream& operator <<(ostream &strm) = 0;
-};
-
-class IntValue : public Value {
-public:
-    int val;
-
-    IntValue(int val = 0) : Value(INTEGER), val(val) { }
-
-    ostream& operator <<(ostream &strm) {
-        // TODO
-        return strm;
-    }
-};
-
-class StrValue : public Value {
-public:
-    string val;
-
-    StrValue(string val = "") : Value(STRING), val(val) { }
-
-    ostream &operator <<(ostream &strm) {
-        // TODO
-        return strm;
-    }
+    VIRTUAL OSTREAM& OPERATOR <<(OSTREAM &STRM);
 };
 
 map<string, Value *> symbolTable;
@@ -147,7 +123,7 @@ public:
         return 0;
     }
 
-    virtual Value *eval() = 0;
+    virtual Value *eval();
 };
 
 class Slist : public ParseTree {
@@ -167,7 +143,7 @@ public:
 
     Value *eval() {
         Value *val = getLeftChild()->eval();
-        std::cout << &val << std::endl;
+        std::cout << *val << std::endl;
         return val;
     }
 };
