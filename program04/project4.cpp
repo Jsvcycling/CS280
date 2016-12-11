@@ -68,11 +68,6 @@ public:
 class ErrValue : public Value {
 public:
 	ErrValue() : Value(ERRORTYPE) { }
-
-	ostream &operator <<(ostream &strm) {
-		strm << "RUNTIME ERROR" << endl;
-		return strm;
-	}
 };
 
 class IntValue : public Value {
@@ -189,9 +184,9 @@ public:
 		if (val->getType() == ERRORTYPE) {
 			return val;
 		} else if (val->getType() == INTEGER) {
-			std::cout << dynamic_cast<IntValue *>(val)->val << endl;
+			std::cout << static_cast<IntValue *>(val)->val << endl;
 		} else if (val->getType() == STRING) {
-			std::cout << dynamic_cast<StrValue *>(val)->val << endl;
+			std::cout << static_cast<StrValue *>(val)->val << endl;
 		}
 		
         return val;
@@ -261,7 +256,27 @@ public:
 
         if (left->getType() == INTEGER && right->getType() == INTEGER) {
             return new IntValue(dynamic_cast<IntValue *>(left)->val * dynamic_cast<IntValue *>(right)->val);
-        } else {
+        } else if (left->getType() == INTEGER && right->getType() == STRING) {
+			int count = static_cast<IntValue *>(left)->val;
+			string instr = static_cast<StrValue *>(right)->val;
+			string outstr = "";
+
+			for (int i = 0; i < count; i++) {
+				outstr += instr;
+			}
+			
+			return new StrValue(outstr);
+		} else if (left->getType() == STRING && right->getType() == INTEGER) {
+			string instr = static_cast<StrValue *>(left)->val;
+			int count = static_cast<IntValue *>(right)->val;
+			string outstr = "";
+
+			for (int i = 0; i < count; i++) {
+				outstr += instr;
+			}
+			
+			return new StrValue(outstr);
+		} else {
 			return new ErrValue();
         }
     }
@@ -278,7 +293,44 @@ public:
     }
 
     Value *eval() {
-        return new StrValue("");
+		Value *left;
+		Value *right;
+		
+		if (getLeftChild() != nullptr) {
+			left = getLeftChild()->eval();
+		}
+
+		if (getRightChild() != nullptr) {
+			right = getRightChild()->eval();
+		}
+
+		if (left->getType() == INTEGER && right->getType() == ERRORTYPE) {
+			int pos = static_cast<IntValue *>(left)->val;
+			string str = sTok.getLexeme().substr(pos, 1);
+
+			if (str.length() != 1) {
+				return new ErrValue();
+			} else {
+				return new StrValue(str);
+			}
+		} else if (left->getType() == INTEGER && right->getType() == INTEGER) {
+			int pos1 = static_cast<IntValue *>(left)->val;
+			int pos2 = static_cast<IntValue *>(right)->val;
+
+			if (pos1 > sTok.getLexeme().length() || pos2 > sTok.getLexeme().length()) {
+				return new ErrValue();
+			}
+			
+			string str = sTok.getLexeme().substr(pos1, (pos2-pos1));
+
+			if (str.length () <= 0) {
+				return new ErrValue();
+			} else {
+				return new StrValue(str);
+			}
+		} else {
+			return new ErrValue();
+		}
     }
 };
 
