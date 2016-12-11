@@ -1,3 +1,4 @@
-Count of + operators: 5
-Count of * operators: 0
-Count of [] operators: 0
+6
+"three ""plus ""three"
+"three ""and ""three "
+RUNTIME ERROR

@@ -47,19 +47,32 @@ enum ValueType {
 };
 
 class Value {
-protected:
+private:
     ValueType type;
 
+protected:
     Value(ValueType type) : type(type) { }
 
 public:
     Value() : type(ERRORTYPE) { }
 
-    ValueType getType() const {
-        return this->type;
+    ValueType getType() {
+       return this->type;
     }
 
-    virtual ostream& operator <<(ostream &strm) = 0;
+    virtual ostream& operator <<(ostream &strm) {
+		return strm;
+	}
+};
+
+class ErrValue : public Value {
+public:
+	ErrValue() : Value(ERRORTYPE) { }
+
+	ostream &operator <<(ostream &strm) {
+		strm << "RUNTIME ERROR" << endl;
+		return strm;
+	}
 };
 
 class IntValue : public Value {
@@ -67,11 +80,6 @@ public:
     int val;
 
     IntValue(int val = 0) : Value(INTEGER), val(val) { }
-
-    ostream& operator <<(ostream &strm) {
-        // TODO
-        return strm;
-    }
 };
 
 class StrValue : public Value {
@@ -79,11 +87,6 @@ public:
     string val;
 
     StrValue(string val = "") : Value(STRING), val(val) { }
-
-    ostream &operator <<(ostream &strm) {
-        // TODO
-        return strm;
-    }
 };
 
 map<string, Value *> symbolTable;
@@ -147,7 +150,9 @@ public:
         return 0;
     }
 
-    virtual Value *eval() = 0;
+    virtual Value *eval() {
+		return new ErrValue();
+	}
 };
 
 class Slist : public ParseTree {
@@ -155,9 +160,22 @@ public:
     Slist(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
 
     Value *eval() {
-        // TODO: how the hell do we handle this?
+		Value *left;
+		Value *right;
 
-        return 0;
+		if (getLeftChild() != nullptr) {
+			Value *left = getLeftChild()->eval();
+		}
+		
+		if (getRightChild() != nullptr) {
+			Value *right = getRightChild()->eval();
+		}
+
+		if (left->getType() == ERRORTYPE || right->getType() == ERRORTYPE) {
+			return new ErrValue();
+		}
+		
+		return new Value();
     }
 };
 
@@ -167,7 +185,15 @@ public:
 
     Value *eval() {
         Value *val = getLeftChild()->eval();
-        std::cout << &val << std::endl;
+
+		if (val->getType() == ERRORTYPE) {
+			return val;
+		} else if (val->getType() == INTEGER) {
+			std::cout << dynamic_cast<IntValue *>(val)->val << endl;
+		} else if (val->getType() == STRING) {
+			std::cout << dynamic_cast<StrValue *>(val)->val << endl;
+		}
+		
         return val;
     }
 };
@@ -186,6 +212,10 @@ public:
 
     Value *eval() {
         Value *val = getLeftChild()->eval();
+
+		if (val->getType() == ERRORTYPE) {
+			return val;
+		}
 
         if (symbolTable.find(ident) != symbolTable.end()) {
             symbolTable.find(ident)->second = val;
@@ -211,11 +241,9 @@ public:
         if (left->getType() == INTEGER && right->getType() == INTEGER) {
             return new IntValue(dynamic_cast<IntValue *>(left)->val + dynamic_cast<IntValue *>(right)->val);
         } else if (left->getType() == STRING && right->getType() == STRING) {
-            // TODO: both are strings, concat them together.
-            return new StrValue();
+            return new StrValue(dynamic_cast<StrValue *>(left)->val + dynamic_cast<StrValue *>(right)->val);
         } else {
-            // TODO: throw a runtime error.
-            return 0;
+            return new ErrValue();
         }
     }
 };
@@ -234,8 +262,7 @@ public:
         if (left->getType() == INTEGER && right->getType() == INTEGER) {
             return new IntValue(dynamic_cast<IntValue *>(left)->val * dynamic_cast<IntValue *>(right)->val);
         } else {
-            // TODO: throw a runtime error.
-            return 0;
+			return new ErrValue();
         }
     }
 };
@@ -251,7 +278,6 @@ public:
     }
 
     Value *eval() {
-        // TODO: how the hell do we handle this??
         return new StrValue("");
     }
 };
@@ -315,8 +341,7 @@ public:
         if (symbolTable.find(iTok.getLexeme()) != symbolTable.end()) {
             return symbolTable.find(iTok.getLexeme())->second;
         } else {
-            // TODO: throw a runtime error.
-            return 0;
+			return new ErrValue();
         }
     }
 };
@@ -531,8 +556,7 @@ ParseTree *String(istream *in) {
 }
 
 
-int
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     istream *in = &cin;
     ifstream infile;
 
@@ -557,15 +581,16 @@ main(int argc, char *argv[]) {
         return 0;
     }
 
-    // on successful parse, count +, star and []
-
-    cout << "Count of + operators: " << prog->traverseAndCount( &ParseTree::isPlus ) << endl;
-    cout << "Count of * operators: " << prog->traverseAndCount( &ParseTree::isStar ) << endl;
-    cout << "Count of [] operators: " << prog->traverseAndCount( &ParseTree::isBrack ) << endl;
-
-    prog->traverseAndCount( &ParseTree::isEmptyString );
+    // prog->traverseAndCount( &ParseTree::isEmptyString );
 
     map<string,int> symbols;
     int useBeforeSetCount = prog->countUseBeforeSet( symbols );
+
+	Value *val = prog->eval();
+
+	if (val->getType() == ERRORTYPE) {
+		cout << "RUNTIME ERROR" << endl;
+	}
+	
     return 0;
 }
