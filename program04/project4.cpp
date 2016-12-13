@@ -1,8 +1,10 @@
 #include "p2lex.h"
+
 #include <string>
 #include <istream>
 #include <fstream>
 #include <map>
+
 using namespace std;
 
 /// Token Wrapper
@@ -39,11 +41,16 @@ void error(string msg, bool showline=true) {
     ++globalErrorCount;
 }
 
+void runtimeError(string msg) {
+	cout << "RUNTIME ERROR: " << msg << endl;
+}
+
 enum ValueType {
     INTEGER,
     STRING,
 
-    ERRORTYPE
+    ERRORTYPE,
+	PASSTYPE
 };
 
 class Value {
@@ -54,7 +61,7 @@ protected:
     Value(ValueType type) : type(type) { }
 
 public:
-    Value() : type(ERRORTYPE) { }
+    Value() : type(PASSTYPE) { }
 
     ValueType getType() {
        return this->type;
@@ -81,7 +88,7 @@ class StrValue : public Value {
 public:
     string val;
 
-    StrValue(string val = "") : Value(STRING), val(val) { }
+    StrValue(const string &val = "") : Value(STRING), val(val) { }
 };
 
 map<string, Value *> symbolTable;
@@ -155,18 +162,18 @@ public:
     Slist(ParseTree *left, ParseTree *right) : ParseTree(left,right) {}
 
     Value *eval() {
-		Value *left;
-		Value *right;
+		Value *left = new ErrValue();
+		Value *right = new ErrValue();
 
 		if (getLeftChild() != nullptr) {
-			Value *left = getLeftChild()->eval();
+			left = getLeftChild()->eval();
 		}
 		
 		if (getRightChild() != nullptr) {
-			Value *right = getRightChild()->eval();
+			right = getRightChild()->eval();
 		}
 
-		if (left->getType() == ERRORTYPE || right->getType() == ERRORTYPE) {
+		if (left->getType() == ERRORTYPE) {
 			return new ErrValue();
 		}
 		
@@ -179,17 +186,17 @@ public:
     PrintStmt(ParseTree *expr) : ParseTree(expr) {}
 
     Value *eval() {
-        Value *val = getLeftChild()->eval();
+        Value *value = getLeftChild()->eval();
 
-		if (val->getType() == ERRORTYPE) {
-			return val;
-		} else if (val->getType() == INTEGER) {
-			std::cout << static_cast<IntValue *>(val)->val << endl;
-		} else if (val->getType() == STRING) {
-			std::cout << static_cast<StrValue *>(val)->val << endl;
+		if (value->getType() == ERRORTYPE) {
+			return new ErrValue();
+		} else if (value->getType() == INTEGER) {
+			std::cout << static_cast<IntValue *>(value)->val << endl;
+		} else if (value->getType() == STRING) {
+			std::cout << static_cast<StrValue *>(value)->val << endl;
 		}
 		
-        return val;
+        return new Value();
     }
 };
 
@@ -209,7 +216,7 @@ public:
         Value *val = getLeftChild()->eval();
 
 		if (val->getType() == ERRORTYPE) {
-			return val;
+			return new ErrValue();
 		}
 
         if (symbolTable.find(ident) != symbolTable.end()) {
@@ -234,10 +241,11 @@ public:
         Value *right = getRightChild()->eval();
 
         if (left->getType() == INTEGER && right->getType() == INTEGER) {
-            return new IntValue(dynamic_cast<IntValue *>(left)->val + dynamic_cast<IntValue *>(right)->val);
+            return new IntValue(static_cast<IntValue *>(left)->val + static_cast<IntValue *>(right)->val);
         } else if (left->getType() == STRING && right->getType() == STRING) {
-            return new StrValue(dynamic_cast<StrValue *>(left)->val + dynamic_cast<StrValue *>(right)->val);
+            return new StrValue(static_cast<StrValue *>(left)->val + static_cast<StrValue *>(right)->val);
         } else {
+			runtimeError("types being added are not permitted");
             return new ErrValue();
         }
     }
@@ -255,7 +263,7 @@ public:
         Value *right = getRightChild()->eval();
 
         if (left->getType() == INTEGER && right->getType() == INTEGER) {
-            return new IntValue(dynamic_cast<IntValue *>(left)->val * dynamic_cast<IntValue *>(right)->val);
+            return new IntValue(static_cast<IntValue *>(left)->val * static_cast<IntValue *>(right)->val);
         } else if (left->getType() == INTEGER && right->getType() == STRING) {
 			int count = static_cast<IntValue *>(left)->val;
 			string instr = static_cast<StrValue *>(right)->val;
@@ -264,7 +272,7 @@ public:
 			for (int i = 0; i < count; i++) {
 				outstr += instr;
 			}
-			
+
 			return new StrValue(outstr);
 		} else if (left->getType() == STRING && right->getType() == INTEGER) {
 			string instr = static_cast<StrValue *>(left)->val;
@@ -274,9 +282,10 @@ public:
 			for (int i = 0; i < count; i++) {
 				outstr += instr;
 			}
-			
+
 			return new StrValue(outstr);
 		} else {
+			runtimeError("types being multiplied are not permitted");
 			return new ErrValue();
         }
     }
@@ -293,8 +302,8 @@ public:
     }
 
     Value *eval() {
-		Value *left;
-		Value *right;
+		Value *left = new ErrValue();
+		Value *right = new ErrValue();
 		
 		if (getLeftChild() != nullptr) {
 			left = getLeftChild()->eval();
@@ -306,29 +315,42 @@ public:
 
 		if (left->getType() == INTEGER && right->getType() == ERRORTYPE) {
 			int pos = static_cast<IntValue *>(left)->val;
+			
+			if (pos >= sTok.getLexeme().length()) {
+				runtimeError("index position out of bounds");
+				return new ErrValue();
+			}
+			
 			string str = sTok.getLexeme().substr(pos, 1);
 
-			if (str.length() != 1) {
-				return new ErrValue();
-			} else {
-				return new StrValue(str);
-			}
+			// if (str.length() != 1) {
+			// 	runtimeError("no characters selected")
+			// 	return new ErrValue();
+			// } else {
+			// 	return new StrValue(str);
+			// }
+
+			return new StrValue(str);
 		} else if (left->getType() == INTEGER && right->getType() == INTEGER) {
 			int pos1 = static_cast<IntValue *>(left)->val;
 			int pos2 = static_cast<IntValue *>(right)->val;
 
-			if (pos1 > sTok.getLexeme().length() || pos2 > sTok.getLexeme().length()) {
+			if (pos1 >= sTok.getLexeme().length() || pos2 >= sTok.getLexeme().length()) {
+				runtimeError("index position(s) out of bounds");
 				return new ErrValue();
 			}
 			
 			string str = sTok.getLexeme().substr(pos1, (pos2-pos1));
 
-			if (str.length () <= 0) {
-				return new ErrValue();
-			} else {
-				return new StrValue(str);
-			}
+			// if (str.length () <= 0) {
+			// 	return new ErrValue();
+			// } else {
+			// 	return new StrValue(str);
+			// }
+
+			return new StrValue(str);
 		} else {
+			runtimeError("invalid index parameters");
 			return new ErrValue();
 		}
     }
@@ -342,8 +364,9 @@ public:
     StringConst(const Token& sTok) : ParseTree(), sTok(sTok) {}
 
     string	getString() {
-        return sTok.getLexeme();
+		return sTok.getLexeme();
     }
+
     int isEmptyString() {
         if( sTok.getLexeme().length() == 2 ) {
             error("Empty string not permitted on line " + to_string(onWhichLine()), false );
@@ -353,7 +376,12 @@ public:
     }
 
     Value *eval() {
-        return new StrValue(getString());
+
+		// if (str.length() > 2) {
+		// 	str = str.substr(1, str.length() - 2);
+		// }
+
+		return new StrValue(getString().substr(1, getString().size() - 2));
     }
 };
 
@@ -393,6 +421,7 @@ public:
         if (symbolTable.find(iTok.getLexeme()) != symbolTable.end()) {
             return symbolTable.find(iTok.getLexeme())->second;
         } else {
+			cout << "bad id" << endl;
 			return new ErrValue();
         }
     }
@@ -639,10 +668,6 @@ int main(int argc, char *argv[]) {
     int useBeforeSetCount = prog->countUseBeforeSet( symbols );
 
 	Value *val = prog->eval();
-
-	if (val->getType() == ERRORTYPE) {
-		cout << "RUNTIME ERROR" << endl;
-	}
 	
     return 0;
 }
